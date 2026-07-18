@@ -11,7 +11,7 @@ NC='\033[0m' # No Color
 
 # Start Hardhat node in background
 echo -e "${YELLOW}Starting Hardhat node...${NC}"
-bunx --bun hardhat node > /dev/null 2>&1 &
+pnpm exec hardhat node > /dev/null 2>&1 &
 NODE_PID=$!
 
 # Function to cleanup
@@ -30,6 +30,6 @@ sleep 3
 
 # Run tests
 echo -e "${GREEN}Running tests...${NC}"
-bunx mocha test/**/*.test.ts
+pnpm exec mocha --require tsx/cjs "test/**/*.test.ts"
 
 echo -e "${GREEN}Tests complete!${NC}"
