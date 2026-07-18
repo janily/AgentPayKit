@@ -1,59 +1,44 @@
 # Web Frontend Dockerfile (Multi-stage)
-FROM oven/bun:1-alpine AS base
+FROM node:22-alpine AS base
 
 WORKDIR /app
 
 # Install wget for healthchecks
-RUN apk add --no-cache wget
+RUN apk add --no-cache wget && corepack enable
 
-# Copy root package files
-COPY package.json bun.lock ./
-
-# Copy workspace packages
-COPY packages/tsconfig ./packages/tsconfig
-COPY packages/contracts ./packages/contracts
-COPY packages/x402 ./packages/x402
-COPY apps/web ./apps/web
-
-# Install dependencies
-RUN bun install
+# Copy the workspace before installing from its shared lockfile.
+COPY . ./
+RUN pnpm install --frozen-lockfile
 
 # Build x402 package
-WORKDIR /app/packages/x402
-RUN bun run build
+RUN pnpm --filter @paybot/x402 run build
 
 # Build contracts package
-WORKDIR /app/packages/contracts
-RUN bun run compile
+RUN pnpm --filter @paybot/contracts run compile
 
 # Development stage
 WORKDIR /app
 FROM base AS development
 
-WORKDIR /app/apps/web
-
 # Expose Vite dev server port
 EXPOSE 5173
 
 # Start Vite dev server
-CMD ["bun", "run", "dev", "--host", "0.0.0.0"]
+CMD ["pnpm", "--filter", "@paybot/web", "run", "dev", "--", "--host", "0.0.0.0"]
 
 # Production build stage
 FROM base AS builder
 
-WORKDIR /app/apps/web
-
 # Build the application
-RUN bun run build
+RUN pnpm --filter @paybot/web run build
 
 # Production stage
-FROM oven/bun:1-alpine AS production
+FROM node:22-alpine AS production
 
 WORKDIR /app
 
 # Install wget for healthchecks and serve for static file serving
-RUN apk add --no-cache wget && \
-    bun add -g serve
+RUN apk add --no-cache wget && npm install --global serve
 
 # Copy built files from builder
 COPY --from=builder /app/apps/web/dist ./dist
