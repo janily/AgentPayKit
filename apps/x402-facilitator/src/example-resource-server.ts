@@ -6,6 +6,7 @@
  */
 
 import { Hono } from "hono";
+import { serve } from "@hono/node-server";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { x402Middleware, x402CheckOnly } from "@paybot/x402";
@@ -218,6 +219,11 @@ console.log(`🚀 Example Resource Server starting on port ${PORT}`);
 console.log(`💰 Payment Address: ${PAY_TO_ADDRESS}`);
 console.log(`🪙 Asset Address: ${ASSET_ADDRESS}`);
 console.log(`🔗 Facilitator URL: ${FACILITATOR_URL}`);
+
+serve({
+  fetch: app.fetch,
+  port: PORT,
+});
 
 export default {
   port: PORT,
