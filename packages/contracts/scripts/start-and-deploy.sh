@@ -5,7 +5,7 @@ echo "🚀 Starting Hardhat node and deploying contracts..."
 
 # Start Hardhat node in the background
 echo "📡 Starting Hardhat node..."
-bunx --bun hardhat node &
+pnpm exec hardhat node &
 NODE_PID=$!
 
 # Wait for node to be ready
@@ -27,12 +27,12 @@ done
 
 # Deploy contracts
 echo "📝 Deploying contracts..."
-if bun run scripts/deploy.ts; then
+if pnpm exec tsx scripts/deploy.ts; then
   echo "✅ Contracts deployed successfully!"
 
   # Export contract ABIs
   echo "📤 Exporting contract ABIs..."
-  bun run scripts/export-contracts.ts
+  pnpm exec tsx scripts/export-contracts.ts
   echo "✅ Contract ABIs exported!"
 else
   echo "❌ Contract deployment failed"
