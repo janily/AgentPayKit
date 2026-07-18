@@ -128,7 +128,7 @@ test_contracts() {
 
     cd packages/contracts
 
-    if bun run test 2>&1 | grep -q "passing"; then
+    if pnpm --filter @paybot/contracts run test 2>&1 | grep -q "passing"; then
         success "Contract tests passed"
     else
         error "Contract tests failed"
@@ -152,11 +152,11 @@ main() {
     fi
     success "docker-compose found"
 
-    if ! command -v bun &> /dev/null; then
-        error "bun not found"
+    if ! command -v pnpm &> /dev/null; then
+        error "pnpm not found"
         exit 1
     fi
-    success "bun found"
+    success "pnpm found"
 
     if ! command -v curl &> /dev/null; then
         error "curl not found"
