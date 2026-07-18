@@ -5,15 +5,15 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "compile": "bunx --bun hardhat compile",
+    "compile": "hardhat compile",
     "test": "bash scripts/test.sh",
-    "test:watch": "bunx mocha test/**/*.test.ts --watch",
-    "test:coverage": "bunx hardhat coverage",
-    "deploy:local": "bun run scripts/deploy.ts",
-    "node": "bunx --bun hardhat node",
+    "test:watch": "mocha --require tsx/cjs \"test/**/*.test.ts\" --watch",
+    "test:coverage": "hardhat coverage",
+    "deploy:local": "tsx scripts/deploy.ts",
+    "node": "hardhat node",
     "node:deploy": "sh scripts/start-and-deploy.sh",
-    "clean": "bunx hardhat clean && rm -rf cache artifacts typechain-types deployments",
-    "export": "bun run scripts/export-contracts.ts"
+    "clean": "hardhat clean && rm -rf cache artifacts typechain-types deployments",
+    "export": "tsx scripts/export-contracts.ts"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-ignition": "^3.0.5",
