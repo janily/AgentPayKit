@@ -31,10 +31,10 @@
 
 **Files:** Create `tests/e2e/scenarios/{happy-path,data-rejected,wallet-rejected,wrong-network,insufficient-balance,quote-expired,concurrent-submit,input-mismatch,handler-timeout,policy-failed,settle-recovery,cli-resume}.test.ts`, runner and report schema.
 
-- [ ] 每个场景先声明预期 final status、ChargeState、execution count、settle count、transfer count、result visibility。
-- [ ] 以 testkit 运行全部场景；在实现前预期至少一个断言失败以验证 runner 会阻断。
-- [ ] 修正 test harness/产品缺陷，禁止降低断言；生成 `artifacts/e2e-simulated.json`。
-- [ ] 运行 `pnpm vitest run tests/e2e/scenarios --reporter=verbose`；预期 12 files passed。
+- [x] 每个场景先声明预期 final status、ChargeState、execution count、settle count、transfer count、result visibility。
+- [x] 以 testkit 运行全部场景；在实现前预期至少一个断言失败以验证 runner 会阻断。
+- [x] 修正 test harness/产品缺陷，禁止降低断言；生成 `artifacts/e2e-simulated.json`。
+- [x] 运行 `pnpm vitest run tests/e2e/scenarios --reporter=verbose`；预期 12 files passed。
 - [ ] 提交：`git commit -m "test(e2e): cover the twelve paid invocation scenarios"`。
 
 ### Task 3: Run security, retention and dual-agent installation gates

@@ -1,0 +1,248 @@
+{
+  "schemaVersion": "1",
+  "generatedAt": "2026-07-19T00:00:00.000Z",
+  "passed": 12,
+  "failed": 0,
+  "results": [
+    {
+      "name": "happy-path",
+      "expected": {
+        "finalStatus": "RESULT_AVAILABLE",
+        "chargeState": "CHARGED",
+        "executionCount": 1,
+        "settleCount": 1,
+        "transferCount": 1,
+        "resultVisible": true
+      },
+      "actual": {
+        "finalStatus": "RESULT_AVAILABLE",
+        "chargeState": "CHARGED",
+        "executionCount": 1,
+        "settleCount": 1,
+        "transferCount": 1,
+        "resultVisible": true
+      },
+      "passed": true
+    },
+    {
+      "name": "data-rejected",
+      "expected": {
+        "finalStatus": "FAILED_NOT_CHARGED",
+        "chargeState": "NOT_CHARGED",
+        "executionCount": 0,
+        "settleCount": 0,
+        "transferCount": 0,
+        "resultVisible": false
+      },
+      "actual": {
+        "finalStatus": "FAILED_NOT_CHARGED",
+        "chargeState": "NOT_CHARGED",
+        "executionCount": 0,
+        "settleCount": 0,
+        "transferCount": 0,
+        "resultVisible": false
+      },
+      "passed": true
+    },
+    {
+      "name": "wallet-rejected",
+      "expected": {
+        "finalStatus": "QUOTED",
+        "chargeState": "NOT_CHARGED",
+        "executionCount": 0,
+        "settleCount": 0,
+        "transferCount": 0,
+        "resultVisible": false
+      },
+      "actual": {
+        "finalStatus": "QUOTED",
+        "chargeState": "NOT_CHARGED",
+        "executionCount": 0,
+        "settleCount": 0,
+        "transferCount": 0,
+        "resultVisible": false
+      },
+      "passed": true
+    },
+    {
+      "name": "wrong-network",
+      "expected": {
+        "finalStatus": "QUOTED",
+        "chargeState": "NOT_CHARGED",
+        "executionCount": 0,
+        "settleCount": 0,
+        "transferCount": 0,
+        "resultVisible": false
+      },
+      "actual": {
+        "finalStatus": "QUOTED",
+        "chargeState": "NOT_CHARGED",
+        "executionCount": 0,
+        "settleCount": 0,
+        "transferCount": 0,
+        "resultVisible": false
+      },
+      "passed": true
+    },
+    {
+      "name": "insufficient-balance",
+      "expected": {
+        "finalStatus": "QUOTED",
+        "chargeState": "NOT_CHARGED",
+        "executionCount": 0,
+        "settleCount": 0,
+        "transferCount": 0,
+        "resultVisible": false
+      },
+      "actual": {
+        "finalStatus": "QUOTED",
+        "chargeState": "NOT_CHARGED",
+        "executionCount": 0,
+        "settleCount": 0,
+        "transferCount": 0,
+        "resultVisible": false
+      },
+      "passed": true
+    },
+    {
+      "name": "quote-expired",
+      "expected": {
+        "finalStatus": "QUOTED",
+        "chargeState": "NOT_CHARGED",
+        "executionCount": 0,
+        "settleCount": 0,
+        "transferCount": 0,
+        "resultVisible": false
+      },
+      "actual": {
+        "finalStatus": "QUOTED",
+        "chargeState": "NOT_CHARGED",
+        "executionCount": 0,
+        "settleCount": 0,
+        "transferCount": 0,
+        "resultVisible": false
+      },
+      "passed": true
+    },
+    {
+      "name": "concurrent-submit",
+      "expected": {
+        "finalStatus": "RESULT_AVAILABLE",
+        "chargeState": "CHARGED",
+        "executionCount": 1,
+        "settleCount": 1,
+        "transferCount": 1,
+        "resultVisible": true
+      },
+      "actual": {
+        "finalStatus": "RESULT_AVAILABLE",
+        "chargeState": "CHARGED",
+        "executionCount": 1,
+        "settleCount": 1,
+        "transferCount": 1,
+        "resultVisible": true
+      },
+      "passed": true
+    },
+    {
+      "name": "input-mismatch",
+      "expected": {
+        "finalStatus": "QUOTED",
+        "chargeState": "NOT_CHARGED",
+        "executionCount": 0,
+        "settleCount": 0,
+        "transferCount": 0,
+        "resultVisible": false
+      },
+      "actual": {
+        "finalStatus": "QUOTED",
+        "chargeState": "NOT_CHARGED",
+        "executionCount": 0,
+        "settleCount": 0,
+        "transferCount": 0,
+        "resultVisible": false
+      },
+      "passed": true
+    },
+    {
+      "name": "handler-timeout",
+      "expected": {
+        "finalStatus": "FAILED_NOT_CHARGED",
+        "chargeState": "NOT_CHARGED",
+        "executionCount": 1,
+        "settleCount": 0,
+        "transferCount": 0,
+        "resultVisible": false
+      },
+      "actual": {
+        "finalStatus": "FAILED_NOT_CHARGED",
+        "chargeState": "NOT_CHARGED",
+        "executionCount": 1,
+        "settleCount": 0,
+        "transferCount": 0,
+        "resultVisible": false
+      },
+      "passed": true
+    },
+    {
+      "name": "policy-failed",
+      "expected": {
+        "finalStatus": "POLICY_REJECTED",
+        "chargeState": "NOT_CHARGED",
+        "executionCount": 1,
+        "settleCount": 0,
+        "transferCount": 0,
+        "resultVisible": false
+      },
+      "actual": {
+        "finalStatus": "POLICY_REJECTED",
+        "chargeState": "NOT_CHARGED",
+        "executionCount": 1,
+        "settleCount": 0,
+        "transferCount": 0,
+        "resultVisible": false
+      },
+      "passed": true
+    },
+    {
+      "name": "settle-recovery",
+      "expected": {
+        "finalStatus": "RESULT_AVAILABLE",
+        "chargeState": "CHARGED",
+        "executionCount": 1,
+        "settleCount": 1,
+        "transferCount": 1,
+        "resultVisible": true
+      },
+      "actual": {
+        "finalStatus": "RESULT_AVAILABLE",
+        "chargeState": "CHARGED",
+        "executionCount": 1,
+        "settleCount": 1,
+        "transferCount": 1,
+        "resultVisible": true
+      },
+      "passed": true
+    },
+    {
+      "name": "cli-resume",
+      "expected": {
+        "finalStatus": "RESULT_AVAILABLE",
+        "chargeState": "CHARGED",
+        "executionCount": 1,
+        "settleCount": 1,
+        "transferCount": 1,
+        "resultVisible": true
+      },
+      "actual": {
+        "finalStatus": "RESULT_AVAILABLE",
+        "chargeState": "CHARGED",
+        "executionCount": 1,
+        "settleCount": 1,
+        "transferCount": 1,
+        "resultVisible": true
+      },
+      "passed": true
+    }
+  ]
+}
