@@ -32,11 +32,11 @@
 
 **Files:** Create `examples/paid-deep-research-lite/src/success-policy.ts`, `test/success-policy.test.ts`; modify Release template/config.
 
-- [ ] 表驱动测试：499/500 字符、1/2 citation、重复 citation、HTTP citation、schema 错误、provider/cost/cap violation。
-- [ ] 运行测试；预期 policy 缺失失败。
-- [ ] Policy 验证 output schema、非空白字符数、去重 HTTPS URL 与所有 hard-cap telemetry；返回结构化原因且不含正文。
-- [ ] 集成测试断言每个失败样本 settle spy=0，成功样本 settle=1。
-- [ ] 提交：`git commit -m "feat(example): gate settlement with research success policy"`。
+- [x] 表驱动测试：499/500 字符、1/2 citation、重复 citation、HTTP citation、schema 错误、provider/cost/cap violation。
+- [x] 运行测试；预期 policy 缺失失败。
+- [x] Policy 验证 output schema、非空白字符数、去重 HTTPS URL 与所有 hard-cap telemetry；返回结构化原因且不含正文。
+- [x] 集成测试断言每个失败样本 settle spy=0，成功样本 settle=1。
+- [x] 提交：`git commit -m "feat(example): gate settlement with research success policy"`。
 
 ### Task 3: Add allowlisted structured logging
 
