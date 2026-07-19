@@ -1,6 +1,7 @@
 import { canonicalJson } from "./canonical-json";
 
 export type SignatureDomain =
+  | "runtime-quote-v1"
   | "runtime-status-v1"
   | "runtime-result-v1"
   | "runtime-receipt-v1"
@@ -10,6 +11,11 @@ export interface CanonicalSignature {
   algorithm: "Ed25519";
   keyId: string;
   value: string;
+}
+
+export interface SignedEnvelope<Payload> {
+  payload: Payload;
+  signature: CanonicalSignature;
 }
 
 const PKCS8_ED25519_PREFIX = Uint8Array.from([

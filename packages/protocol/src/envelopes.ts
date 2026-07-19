@@ -1,9 +1,13 @@
 import {
+  type InputDigest,
   parseInvocationId,
   parseTraceId,
   type InvocationId,
+  type QuoteId,
+  type ReleaseId,
   type TraceId,
 } from "./ids";
+import type { CanonicalSignature, SignedEnvelope } from "./signatures";
 import {
   parseChargeState,
   parseInvocationStatus,
@@ -19,6 +23,29 @@ export interface StatusEnvelope {
   version: number;
   updatedAt: string;
   traceId: TraceId;
+}
+
+export interface QuoteEnvelope {
+  schemaVersion: "1";
+  quoteId: QuoteId;
+  invocationId: InvocationId;
+  releaseId: ReleaseId;
+  inputDigest: InputDigest;
+  environment: "testnet" | "mainnet";
+  network: "eip155:84532" | "eip155:8453";
+  amount: string;
+  asset: `0x${string}`;
+  payee: `0x${string}`;
+  paymentIdentifier: InvocationId;
+  issuedAt: string;
+  expiresAt: string;
+}
+
+export type SignedQuote = SignedEnvelope<QuoteEnvelope>;
+export type SignedStatus = SignedEnvelope<StatusEnvelope>;
+
+export interface RuntimeSigner {
+  sign(payload: unknown): Promise<CanonicalSignature>;
 }
 
 export interface ResultEnvelope {

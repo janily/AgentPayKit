@@ -6,6 +6,11 @@ import {
 import { x402ResourceServer } from "@x402/core/server";
 import type { PaymentPayload, PaymentRequirements } from "@x402/core/types";
 import { ExactEvmScheme } from "@x402/evm/exact/server";
+import {
+  PAYMENT_IDENTIFIER,
+  declarePaymentIdentifierExtension,
+  paymentIdentifierResourceServerExtension,
+} from "@x402/extensions/payment-identifier";
 
 import type { PaymentConfig } from "./config";
 import type {
@@ -138,10 +143,9 @@ export async function createOfficialPaymentAdapter({
     url: config.facilitatorUrl,
     ...(createAuthHeaders ? { createAuthHeaders } : {}),
   });
-  const coreServer = new x402ResourceServer(facilitator).register(
-    config.network,
-    new ExactEvmScheme(),
-  );
+  const coreServer = new x402ResourceServer(facilitator)
+    .register(config.network, new ExactEvmScheme())
+    .registerExtension(paymentIdentifierResourceServerExtension);
   const httpServer = new x402HTTPResourceServer(coreServer, {
     [`${method.toUpperCase()} ${path}`]: {
       accepts: {
@@ -152,6 +156,9 @@ export async function createOfficialPaymentAdapter({
       },
       description: "AgentPayKit paid invocation",
       mimeType: "application/json",
+      extensions: {
+        [PAYMENT_IDENTIFIER]: declarePaymentIdentifierExtension(true),
+      },
     },
   });
   await httpServer.initialize();

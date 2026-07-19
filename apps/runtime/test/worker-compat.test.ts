@@ -36,7 +36,7 @@ describe("Cloudflare Workers compatibility", () => {
     await expect(health.json()).resolves.toEqual({ status: "ok" });
 
     const paidRoute = await miniflare.dispatchFetch(
-      "http://runtime.test/spike/paid-ping",
+      "http://runtime.test/v1/invocations",
       {
         method: "POST",
       },
@@ -45,5 +45,11 @@ describe("Cloudflare Workers compatibility", () => {
     await expect(paidRoute.json()).resolves.toEqual({
       error: "runtime_not_configured",
     });
+
+    const removedSpike = await miniflare.dispatchFetch(
+      "http://runtime.test/spike/paid-ping",
+      { method: "POST" },
+    );
+    expect(removedSpike.status).toBe(404);
   });
 });

@@ -26,6 +26,12 @@ importers:
       '@agentpaykit/payment':
         specifier: workspace:^
         version: link:../../packages/payment
+      '@agentpaykit/protocol':
+        specifier: workspace:^
+        version: link:../../packages/protocol
+      '@agentpaykit/runtime-core':
+        specifier: workspace:^
+        version: link:../../packages/runtime
       '@x402/core':
         specifier: 2.19.0
         version: 2.19.0

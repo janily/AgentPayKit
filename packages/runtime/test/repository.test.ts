@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 
 import { Miniflare } from "miniflare";
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
@@ -19,7 +19,9 @@ const baseInvocation = {
   inputDigest,
   requestFingerprint: `sha256:${"c".repeat(64)}`,
   inputBlobKey: "encrypted/input/one",
+  inputBlobDigest: `sha256:${"1".repeat(64)}`,
   paymentBlobKey: "encrypted/payment/one",
+  paymentBlobDigest: `sha256:${"2".repeat(64)}`,
   traceId: "trc_01J00000000000000000000000",
   now: "2026-07-19T00:00:00.000Z",
 };
@@ -36,15 +38,18 @@ describe("D1 invocation repository", () => {
       script: 'export default { fetch() { return new Response("ok") } }',
     });
     const database = await miniflare.getD1Database("DB");
-    const migration = await readFile(
-      new URL("../migrations/0001_initial.sql", import.meta.url),
-      "utf8",
-    );
-    for (const statement of migration
-      .split(";")
-      .map((value) => value.trim())
-      .filter(Boolean)) {
-      await database.prepare(statement).run();
+    const migrationsUrl = new URL("../migrations/", import.meta.url);
+    for (const filename of (await readdir(migrationsUrl)).sort()) {
+      const migration = await readFile(
+        new URL(filename, migrationsUrl),
+        "utf8",
+      );
+      for (const statement of migration
+        .split(";")
+        .map((value) => value.trim())
+        .filter(Boolean)) {
+        await database.prepare(statement).run();
+      }
     }
     repository = new D1InvocationRepository(database);
     await repository.createRelease({
@@ -52,6 +57,10 @@ describe("D1 invocation repository", () => {
       packageDigest: `sha256:${"d".repeat(64)}`,
       publisherId: `0x${"e".repeat(40)}`,
       network: "eip155:84532",
+      environment: "testnet",
+      amount: "10000",
+      asset: `0x${"a".repeat(40)}`,
+      payee: `0x${"b".repeat(40)}`,
       now: baseInvocation.now,
     });
     await repository.createQuote({

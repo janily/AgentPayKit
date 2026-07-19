@@ -19,6 +19,8 @@
   },
   "dependencies": {
     "@agentpaykit/payment": "workspace:^",
+    "@agentpaykit/protocol": "workspace:^",
+    "@agentpaykit/runtime-core": "workspace:^",
     "@x402/core": "2.19.0",
     "@x402/evm": "2.19.0",
     "@x402/hono": "2.19.0",
