@@ -1,0 +1,102 @@
+import { readFile } from "node:fs/promises";
+
+const env = process.env;
+
+function fail(code) {
+  throw new Error(`${code}. No transaction was broadcast.`);
+}
+
+function address(value, code) {
+  if (!/^0x[0-9a-fA-F]{40}$/.test(value ?? "")) fail(code);
+  return value.toLowerCase();
+}
+
+async function json(path) {
+  return JSON.parse(await readFile(path, "utf8"));
+}
+
+async function rpc(method, params) {
+  const response = await fetch(env.MAINNET_RPC_URL, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
+  });
+  const body = await response.json();
+  if (!response.ok || body.error || body.result === undefined) {
+    fail(`MAINNET_RPC_${method}_FAILED`);
+  }
+  return body.result;
+}
+
+async function usdcBalance(asset, account) {
+  const accountWord = account.slice(2).padStart(64, "0");
+  return BigInt(
+    await rpc("eth_call", [
+      { to: asset, data: `0x70a08231${accountWord}` },
+      "latest",
+    ]),
+  );
+}
+
+const releaseDocument = await json(env.MAINNET_RELEASE_FILE);
+const release = releaseDocument.payload ?? releaseDocument;
+const payee = address(env.MAINNET_PAYEE_ADDRESS, "INVALID_MAINNET_PAYEE");
+const asset = address(env.MAINNET_USDC_ADDRESS, "INVALID_MAINNET_USDC");
+const codexWallet = address(
+  env.MAINNET_CODEX_WALLET_ADDRESS,
+  "INVALID_CODEX_WALLET",
+);
+const claudeWallet = address(
+  env.MAINNET_CLAUDE_WALLET_ADDRESS,
+  "INVALID_CLAUDE_WALLET",
+);
+if (codexWallet === claudeWallet) fail("MAINNET_WALLETS_MUST_BE_DISTINCT");
+if (
+  release.environment !== "mainnet" ||
+  release.network !== "eip155:8453" ||
+  release.amount !== "10000" ||
+  String(release.payee).toLowerCase() !== payee ||
+  String(release.asset).toLowerCase() !== asset ||
+  !/^rel_[0-9a-f]{64}$/.test(release.releaseId ?? "")
+) {
+  fail("MAINNET_RELEASE_TERMS_MISMATCH");
+}
+if (env.MAINNET_BUDGET_LIMIT_ATOMIC !== "20000") {
+  fail("MAINNET_BUDGET_MUST_EQUAL_20000");
+}
+if (env.AGENTPAY_MAINNET_CONFIRM !== `ACCEPT MAINNET ${release.releaseId}`) {
+  fail("MAINNET_CONFIRMATION_MISMATCH");
+}
+
+const simulated = await json("artifacts/e2e-simulated.json");
+const security = await json("artifacts/security-gates.json");
+const sepolia = await json("artifacts/e2e-sepolia.json").catch(() => null);
+if (simulated.passed !== 12 || simulated.failed !== 0) {
+  fail("SIMULATED_GATE_NOT_PASSED");
+}
+if (security.failed !== 0) fail("SECURITY_GATE_NOT_PASSED");
+if (!sepolia || sepolia.passed !== 12 || sepolia.failed !== 0) {
+  fail("SEPOLIA_GATE_NOT_PASSED");
+}
+
+for (const wallet of [codexWallet, claudeWallet]) {
+  if ((await usdcBalance(asset, wallet)) < 10_000n) {
+    fail("MAINNET_WALLET_USDC_INSUFFICIENT");
+  }
+  if (BigInt(await rpc("eth_getBalance", [wallet, "latest"])) === 0n) {
+    fail("MAINNET_WALLET_GAS_INSUFFICIENT");
+  }
+}
+
+process.stdout.write(
+  `${JSON.stringify({
+    schemaVersion: "1",
+    ok: true,
+    releaseId: release.releaseId,
+    network: release.network,
+    amount: release.amount,
+    budgetLimit: env.MAINNET_BUDGET_LIMIT_ATOMIC,
+    wallets: [codexWallet, claudeWallet],
+    broadcast: false,
+  })}\n`,
+);
