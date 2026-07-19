@@ -51,7 +51,7 @@
 
 **Files:** Create `scripts/e2e-sepolia.sh`, `tests/e2e/sepolia.test.ts`, `docs/acceptance/m7-sepolia.md`, evidence JSON.
 
-- [ ] 脚本预检 `AGENTPAY_E2E_SEPOLIA=1`、CDP credentials、Cloudflare deployment、test wallet、payee、USDC balance 与 Release network。
+- [x] 脚本预检 `AGENTPAY_E2E_SEPOLIA=1`、CDP credentials、Cloudflare deployment、test wallet、payee、USDC balance 与 Release network。
 - [ ] 在 Base Sepolia 对正常、并发提交、Handler failure、Policy failure、settle timeout/recovery、CLI resume 六个链上关键场景执行；其余 UI/本地失败使用真实 Bridge + mock provider。
 - [ ] 对每个付费场景核对 tx receipt、USDC Transfer/AuthorizationUsed、Receipt、用户支出与 payee 增量；零收费场景核对 transfer count=0。
 - [ ] 命令：`AGENTPAY_E2E_SEPOLIA=1 bash scripts/e2e-sepolia.sh`；预期 report `passed=12 failed=0`。
