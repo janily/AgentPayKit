@@ -9,7 +9,7 @@ export interface VerifiedPaymentSnapshot {
 }
 
 export type SettlementOutcome =
-  | { state: "SETTLEMENT_UNKNOWN" }
+  | { state: "SETTLEMENT_UNKNOWN"; transactionHash?: `0x${string}` }
   | { state: "NOT_CHARGED"; errorCode: string }
   | {
       state: "CHARGED";
@@ -77,7 +77,7 @@ export class SettlementService {
       requirements.network,
     );
     if (!confirmation.confirmed || !confirmation.confirmedAt) {
-      return { state: "SETTLEMENT_UNKNOWN" };
+      return { state: "SETTLEMENT_UNKNOWN", transactionHash };
     }
     return {
       state: "CHARGED",

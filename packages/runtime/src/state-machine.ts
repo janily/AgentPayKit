@@ -4,7 +4,8 @@ export const allowedTransitions = [
   ["QUOTED", "PAYMENT_VERIFIED"],
   ["PAYMENT_VERIFIED", "QUEUED"],
   ["QUEUED", "EXECUTING"],
-  ["EXECUTING", "EXECUTION_FAILED"],
+  ["EXECUTING", "FAILED_NOT_CHARGED"],
+  ["SETTLING", "FAILED_NOT_CHARGED"],
   ["EXECUTING", "POLICY_REJECTED"],
   ["EXECUTING", "READY_TO_SETTLE"],
   ["READY_TO_SETTLE", "SETTLING"],
@@ -12,6 +13,7 @@ export const allowedTransitions = [
   ["SETTLING", "RESULT_AVAILABLE"],
   ["SETTLEMENT_UNKNOWN", "SETTLING"],
   ["SETTLEMENT_UNKNOWN", "RESULT_AVAILABLE"],
+  ["SETTLEMENT_UNKNOWN", "FAILED_NOT_CHARGED"],
   ["RESULT_AVAILABLE", "RESULT_EXPIRED"],
 ] as const satisfies readonly (readonly [InvocationStatus, InvocationStatus])[];
 

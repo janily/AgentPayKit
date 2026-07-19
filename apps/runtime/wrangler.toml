@@ -3,6 +3,9 @@ main = "src/index.ts"
 compatibility_date = "2026-07-19"
 compatibility_flags = ["nodejs_compat"]
 
+[triggers]
+crons = ["*/15 * * * *"]
+
 [[d1_databases]]
 binding = "DB"
 database_name = "agentpaykit"

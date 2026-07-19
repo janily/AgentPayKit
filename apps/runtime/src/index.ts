@@ -1,8 +1,10 @@
 import {
   createOfficialPaymentAdapter,
   createOfficialPaymentChallengeIssuer,
+  PaymentReconciler,
   parsePaymentConfig,
   readOfficialPaymentIdentifier,
+  type SettlePaymentInput,
 } from "@agentpaykit/payment";
 import { signCanonical } from "@agentpaykit/protocol";
 import {
@@ -11,7 +13,10 @@ import {
   InvocationService,
   InvocationQueueConsumer,
   QuoteService,
+  ReconciliationService,
   ReceiptService,
+  RecoveryService,
+  RuntimeCleanupService,
   SettlementService,
   SuccessPolicy,
   TimedHandlerRunner,
@@ -21,6 +26,8 @@ import { Hono } from "hono";
 
 import { createInvocationRoutes } from "./routes/invocations";
 import { processInvocationBatch } from "./queue";
+import { BaseChainReader } from "./chain";
+import { createRecoveryRoutes } from "./routes/recovery";
 
 interface R2ObjectPort {
   arrayBuffer(): Promise<ArrayBuffer>;
@@ -104,6 +111,7 @@ function isConfigured(
 interface RuntimeServices {
   app: Hono;
   consumer: InvocationQueueConsumer;
+  cleanup: RuntimeCleanupService;
 }
 
 async function configuredRuntime(
@@ -245,51 +253,33 @@ async function configuredRuntime(
           };
     },
   );
+  const chain = new BaseChainReader({
+    sepoliaRpcUrl: environment.BASE_SEPOLIA_RPC_URL,
+    mainnetRpcUrl: environment.BASE_MAINNET_RPC_URL,
+  });
+  const settlementAdapter = async (snapshot: SettlePaymentInput) => {
+    const requirements = snapshot.paymentRequirements;
+    const adapter = await createOfficialPaymentAdapter({
+      config: parsePaymentConfig({
+        network: requirements.network,
+        amount: requirements.amount,
+        asset: requirements.asset,
+        payee: requirements.payTo,
+        facilitatorUrl: environment.FACILITATOR_URL,
+      }),
+      method: "POST",
+      path: "/v1/invocations",
+    });
+    return adapter;
+  };
   const settlement = new SettlementService({
     settler: {
       async settle(snapshot) {
-        const requirements = snapshot.paymentRequirements;
-        const adapter = await createOfficialPaymentAdapter({
-          config: parsePaymentConfig({
-            network: requirements.network,
-            amount: requirements.amount,
-            asset: requirements.asset,
-            payee: requirements.payTo,
-            facilitatorUrl: environment.FACILITATOR_URL,
-          }),
-          method: "POST",
-          path: "/v1/invocations",
-        });
+        const adapter = await settlementAdapter(snapshot);
         return adapter.settle(snapshot);
       },
     },
-    chain: {
-      async confirm(transactionHash, network) {
-        const rpcUrl =
-          network === "eip155:84532"
-            ? environment.BASE_SEPOLIA_RPC_URL
-            : environment.BASE_MAINNET_RPC_URL;
-        const response = await fetch(rpcUrl, {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            jsonrpc: "2.0",
-            id: 1,
-            method: "eth_getTransactionReceipt",
-            params: [transactionHash],
-          }),
-        });
-        const rpc = (await response.json()) as {
-          result?: { status?: string } | null;
-        };
-        return {
-          confirmed: response.ok && rpc.result?.status === "0x1",
-          ...(response.ok && rpc.result?.status === "0x1"
-            ? { confirmedAt: new Date().toISOString() }
-            : {}),
-        };
-      },
-    },
+    chain,
   });
   const receipts = new ReceiptService({
     vault,
@@ -301,6 +291,40 @@ async function configuredRuntime(
         }),
     },
   });
+  const paymentReconciler = new PaymentReconciler({
+    chain,
+    settler: {
+      async settle(snapshot) {
+        const adapter = await settlementAdapter(snapshot);
+        return adapter.settle(snapshot);
+      },
+    },
+    nowSeconds: () => Math.floor(Date.now() / 1_000),
+  });
+  const reconciliation = new ReconciliationService({
+    repository,
+    vault,
+    payment: paymentReconciler,
+    receipts,
+    now: () => new Date(),
+  });
+  const recovery = new RecoveryService({
+    repository,
+    vault,
+    signer: {
+      sign: (payload) =>
+        signCanonical(
+          typeof payload === "object" && payload !== null && "result" in payload
+            ? "runtime-result-v1"
+            : "runtime-status-v1",
+          payload,
+          {
+            keyId: environment.RUNTIME_SIGNING_KEY_ID,
+            privateKeySeed: signingSeed,
+          },
+        ),
+    },
+  });
   const consumer = new InvocationQueueConsumer({
     repository,
     releases,
@@ -309,20 +333,30 @@ async function configuredRuntime(
     policy,
     settlement,
     receipts,
-    reconciliation: {
-      async reconcile() {
-        throw new Error("RECONCILIATION_PENDING");
-      },
-    },
+    reconciliation,
     now: () => new Date(),
   });
-  return {
-    app: createInvocationRoutes({
-      quote: quoteService,
-      invocation: invocationService,
+  const cleanup = new RuntimeCleanupService({
+    repository,
+    vault,
+    now: () => new Date(),
+  });
+  const app = createInvocationRoutes({
+    quote: quoteService,
+    invocation: invocationService,
+    traceId: () => randomId("trc_"),
+  });
+  app.route(
+    "/",
+    createRecoveryRoutes({
+      recovery,
       traceId: () => randomId("trc_"),
     }),
+  );
+  return {
+    app,
     consumer,
+    cleanup,
   };
 }
 
@@ -366,6 +400,18 @@ export default {
       runtimeCache.set(environment, runtime);
     }
     await processInvocationBatch(batch, (await runtime).consumer);
+  },
+  async scheduled(
+    _controller: unknown,
+    environment: RuntimeEnvironment,
+  ): Promise<void> {
+    if (!isConfigured(environment)) return;
+    let runtime = runtimeCache.get(environment);
+    if (!runtime) {
+      runtime = configuredRuntime(environment);
+      runtimeCache.set(environment, runtime);
+    }
+    await (await runtime).cleanup.run();
   },
 };
 

@@ -150,4 +150,92 @@ describe("D1 invocation repository", () => {
       },
     );
   });
+
+  test("selects retention candidates and deletes expired invocation metadata", async () => {
+    await repository.createOrGetInvocation(baseInvocation);
+
+    await expect(
+      repository.listStaleInputs("2026-07-19T01:00:00.000Z"),
+    ).resolves.toEqual([
+      { id: invocationId, inputBlobKey: baseInvocation.inputBlobKey },
+    ]);
+    await repository.markInputDeleted(invocationId, "2026-07-19T01:00:00.000Z");
+    await expect(
+      repository.listStaleInputs("2026-07-19T02:00:00.000Z"),
+    ).resolves.toEqual([]);
+
+    const transitions = [
+      ["PAYMENT_VERIFIED", "QUEUED"],
+      ["QUEUED", "EXECUTING"],
+      ["EXECUTING", "READY_TO_SETTLE"],
+      ["READY_TO_SETTLE", "SETTLING"],
+    ] as const;
+    for (const [version, [from, to]] of transitions.entries()) {
+      expect(
+        await repository.transition({
+          id: invocationId,
+          from,
+          to,
+          expectedVersion: version,
+          now: `2026-07-19T00:00:0${version + 1}.000Z`,
+          candidateResultBlobKey:
+            to === "READY_TO_SETTLE" ? "candidate/result" : undefined,
+        }),
+      ).toBe(true);
+    }
+    expect(
+      await repository.transition({
+        id: invocationId,
+        from: "SETTLING",
+        to: "RESULT_AVAILABLE",
+        expectedVersion: 4,
+        now: "2026-07-19T00:00:05.000Z",
+        chargeState: "CHARGED",
+        resultBlobKey: "result/final",
+        resultDigest: `sha256:${"9".repeat(64)}`,
+        transactionHash: `0x${"8".repeat(64)}`,
+        resultExpiresAt: "2026-07-20T00:00:05.000Z",
+      }),
+    ).toBe(true);
+    await repository.createReceipt({
+      invocationId,
+      receiptBlobKey: "receipt/final",
+      receiptDigest: `sha256:${"7".repeat(64)}`,
+      transactionHash: `0x${"8".repeat(64)}`,
+      now: "2026-07-19T00:00:05.000Z",
+    });
+
+    await expect(
+      repository.listExpiredResults("2026-07-20T00:00:05.000Z"),
+    ).resolves.toEqual([
+      {
+        id: invocationId,
+        version: 5,
+        resultBlobKey: "result/final",
+        candidateResultBlobKey: "candidate/result",
+      },
+    ]);
+    await expect(
+      repository.listExpiredMetadata("2026-08-19T00:00:00.000Z"),
+    ).resolves.toEqual([
+      {
+        id: invocationId,
+        quoteId,
+        blobKeys: [
+          baseInvocation.inputBlobKey,
+          baseInvocation.paymentBlobKey,
+          "candidate/result",
+          "result/final",
+          "receipt/final",
+        ],
+      },
+    ]);
+
+    await repository.deleteInvocationMetadata(invocationId, quoteId);
+    await expect(
+      repository.getInvocation(invocationId),
+    ).resolves.toBeUndefined();
+    await expect(repository.getQuote(quoteId)).resolves.toBeUndefined();
+    await expect(repository.getReceipt(invocationId)).resolves.toBeUndefined();
+  });
 });

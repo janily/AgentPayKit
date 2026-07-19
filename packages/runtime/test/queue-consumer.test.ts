@@ -145,7 +145,7 @@ describe("InvocationQueueConsumer", () => {
     expect(built.settle).not.toHaveBeenCalled();
     expect(built.transitions.at(-1)).toEqual({
       from: "EXECUTING",
-      to: "EXECUTION_FAILED",
+      to: "FAILED_NOT_CHARGED",
     });
   });
 
@@ -187,6 +187,19 @@ describe("InvocationQueueConsumer", () => {
       built.consumer.process({ invocationId, expectedVersion: 1 }),
     ).resolves.toBe("duplicate");
     expect(built.order).toEqual([]);
+  });
+
+  test("allows only one concurrent delivery to execute and settle", async () => {
+    const built = fixture();
+
+    const outcomes = await Promise.all([
+      built.consumer.process({ invocationId, expectedVersion: 1 }),
+      built.consumer.process({ invocationId, expectedVersion: 1 }),
+    ]);
+
+    expect(outcomes.sort()).toEqual(["duplicate", "processed"]);
+    expect(built.order.filter((step) => step === "handler")).toHaveLength(1);
+    expect(built.settle).toHaveBeenCalledOnce();
   });
 
   test("routes SETTLING redelivery to reconciliation without another settle", async () => {

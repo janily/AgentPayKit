@@ -44,6 +44,9 @@ importers:
       hono:
         specifier: 4.12.31
         version: 4.12.31
+      viem:
+        specifier: 2.55.2
+        version: 2.55.2(typescript@5.9.3)(zod@3.25.76)
     devDependencies:
       '@agentpaykit/tsconfig':
         specifier: workspace:*
@@ -2772,7 +2775,7 @@ snapshots:
 
   '@scure/bip32@1.7.0':
     dependencies:
-      '@noble/curves': 1.9.1
+      '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
       '@scure/base': 1.2.6
 

@@ -55,6 +55,39 @@ function fromBase64Url(value: string): Uint8Array {
   return Uint8Array.from(atob(base64), (character) => character.charCodeAt(0));
 }
 
+export function parseCanonicalSignature(value: unknown): CanonicalSignature {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new TypeError("CanonicalSignature must be an object");
+  }
+  const input = value as Record<string, unknown>;
+  const fields = ["algorithm", "keyId", "value"];
+  for (const key of Object.keys(input)) {
+    if (!fields.includes(key)) throw new TypeError(`unknown field: ${key}`);
+  }
+  for (const key of fields) {
+    if (!(key in input)) throw new TypeError(`missing field: ${key}`);
+  }
+  if (input.algorithm !== "Ed25519")
+    throw new TypeError("unsupported signature algorithm");
+  if (
+    typeof input.keyId !== "string" ||
+    !/^[A-Za-z0-9._:-]{1,128}$/.test(input.keyId)
+  ) {
+    throw new TypeError("invalid keyId");
+  }
+  if (
+    typeof input.value !== "string" ||
+    fromBase64Url(input.value).byteLength !== 64
+  ) {
+    throw new TypeError("invalid Ed25519 signature");
+  }
+  return {
+    algorithm: "Ed25519",
+    keyId: input.keyId,
+    value: input.value,
+  };
+}
+
 export function signaturePayload(
   domain: SignatureDomain,
   payload: unknown,

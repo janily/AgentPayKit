@@ -1,13 +1,19 @@
 import {
   type InputDigest,
   parseInvocationId,
+  parseInputDigest,
+  parseReleaseId,
   parseTraceId,
   type InvocationId,
   type QuoteId,
   type ReleaseId,
   type TraceId,
 } from "./ids";
-import type { CanonicalSignature, SignedEnvelope } from "./signatures";
+import {
+  parseCanonicalSignature,
+  type CanonicalSignature,
+  type SignedEnvelope,
+} from "./signatures";
 import {
   parseChargeState,
   parseInvocationStatus,
@@ -125,5 +131,78 @@ export function parseStatusEnvelope(value: unknown): StatusEnvelope {
     version: input.version as number,
     updatedAt: isoTimestamp(input.updatedAt, "updatedAt"),
     traceId: parseTraceId(input.traceId),
+  };
+}
+
+function address(value: unknown, field: string): `0x${string}` {
+  if (typeof value !== "string" || !/^0x[0-9a-fA-F]{40}$/.test(value)) {
+    throw new TypeError(`${field} must be an EVM address`);
+  }
+  return value as `0x${string}`;
+}
+
+function transactionHash(value: unknown): `0x${string}` {
+  if (typeof value !== "string" || !/^0x[0-9a-fA-F]{64}$/.test(value)) {
+    throw new TypeError("transactionHash must be an EVM transaction hash");
+  }
+  return value as `0x${string}`;
+}
+
+export function parseReceiptEnvelope(value: unknown): ReceiptEnvelope {
+  const input = record(value, "ReceiptEnvelope");
+  assertExactFields(input, [
+    "schemaVersion",
+    "invocationId",
+    "releaseId",
+    "inputDigest",
+    "payer",
+    "payee",
+    "network",
+    "asset",
+    "amount",
+    "transactionHash",
+    "executionStartedAt",
+    "executedAt",
+    "settledAt",
+    "resultDigest",
+  ]);
+  if (input.schemaVersion !== "1")
+    throw new TypeError("unsupported schemaVersion");
+  if (input.network !== "eip155:84532" && input.network !== "eip155:8453") {
+    throw new TypeError("unsupported network");
+  }
+  if (
+    typeof input.amount !== "string" ||
+    !/^(0|[1-9][0-9]*)$/.test(input.amount)
+  ) {
+    throw new TypeError("amount must be an unsigned base-unit integer");
+  }
+  return {
+    schemaVersion: "1",
+    invocationId: parseInvocationId(input.invocationId),
+    releaseId: parseReleaseId(input.releaseId),
+    inputDigest: parseInputDigest(input.inputDigest),
+    payer: address(input.payer, "payer"),
+    payee: address(input.payee, "payee"),
+    network: input.network,
+    asset: address(input.asset, "asset"),
+    amount: input.amount,
+    transactionHash: transactionHash(input.transactionHash),
+    executionStartedAt: isoTimestamp(
+      input.executionStartedAt,
+      "executionStartedAt",
+    ),
+    executedAt: isoTimestamp(input.executedAt, "executedAt"),
+    settledAt: isoTimestamp(input.settledAt, "settledAt"),
+    resultDigest: parseInputDigest(input.resultDigest) as `sha256:${string}`,
+  };
+}
+
+export function parseSignedReceipt(value: unknown): SignedReceipt {
+  const input = record(value, "SignedReceipt");
+  assertExactFields(input, ["payload", "signature"]);
+  return {
+    payload: parseReceiptEnvelope(input.payload),
+    signature: parseCanonicalSignature(input.signature),
   };
 }

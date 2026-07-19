@@ -3,7 +3,7 @@ export const invocationStatuses = [
   "PAYMENT_VERIFIED",
   "QUEUED",
   "EXECUTING",
-  "EXECUTION_FAILED",
+  "FAILED_NOT_CHARGED",
   "POLICY_REJECTED",
   "READY_TO_SETTLE",
   "SETTLING",

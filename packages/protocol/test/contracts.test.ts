@@ -7,6 +7,7 @@ import {
   invocationStatuses,
   parseErrorEnvelope,
   parseInvocationStatus,
+  parseSignedReceipt,
   parseStatusEnvelope,
   signCanonical,
   signaturePayload,
@@ -104,6 +105,41 @@ describe("strict invocation contracts", () => {
         updatedAt: "2026-07-19T00:00:00.000Z",
         traceId: "trc_01J00000000000000000000000",
         rawInput: "must-not-pass",
+      }),
+    ).toThrow(/unknown field: rawInput/);
+  });
+
+  test("strictly parses signed receipts and rejects nested unknown fields", () => {
+    const receipt = {
+      payload: {
+        schemaVersion: "1",
+        invocationId: "inv_01J00000000000000000000000",
+        releaseId: `rel_${"a".repeat(64)}`,
+        inputDigest: `sha256:${"b".repeat(64)}`,
+        payer: `0x${"c".repeat(40)}`,
+        payee: `0x${"d".repeat(40)}`,
+        network: "eip155:84532",
+        asset: `0x${"e".repeat(40)}`,
+        amount: "10000",
+        transactionHash: `0x${"f".repeat(64)}`,
+        executionStartedAt: "2026-07-19T00:00:01.000Z",
+        executedAt: "2026-07-19T00:00:02.000Z",
+        settledAt: "2026-07-19T00:00:03.000Z",
+        resultDigest: `sha256:${"1".repeat(64)}`,
+      },
+      signature: {
+        algorithm: "Ed25519",
+        keyId: "runtime-test-key",
+        value:
+          "ErhqhgkFO7YARTK-G4Cc2qNmiKQkPL-4IlFlKQ2LNocZEy07QleUYM0dVVB2hyIZF2kvYbmc1IsXLqJ6VWJhCg",
+      },
+    } as const;
+
+    expect(parseSignedReceipt(receipt)).toEqual(receipt);
+    expect(() =>
+      parseSignedReceipt({
+        ...receipt,
+        payload: { ...receipt.payload, rawInput: "must-not-pass" },
       }),
     ).toThrow(/unknown field: rawInput/);
   });

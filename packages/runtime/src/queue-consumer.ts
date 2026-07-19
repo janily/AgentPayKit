@@ -61,6 +61,7 @@ export class InvocationQueueConsumer {
           transactionHash: string;
           now: string;
         }): Promise<void>;
+        markInputDeleted?(invocationId: string, now: string): Promise<void>;
       };
       releases: {
         get(id: string): Promise<ReleaseExecutionRecord | undefined>;
@@ -129,6 +130,7 @@ export class InvocationQueueConsumer {
       to: "EXECUTING",
       expectedVersion: invocation.version,
       now: executionStartedAt,
+      executionStartedAt,
     });
     if (!claimed) return "duplicate";
     let version = invocation.version + 1;
@@ -137,7 +139,7 @@ export class InvocationQueueConsumer {
       await this.ports.repository.transition({
         id: invocation.id,
         from: "EXECUTING",
-        to: "EXECUTION_FAILED",
+        to: "FAILED_NOT_CHARGED",
         expectedVersion: version,
         now: this.ports.now().toISOString(),
         errorCode: "RELEASE_NOT_FOUND",
@@ -154,10 +156,14 @@ export class InvocationQueueConsumer {
       );
     } catch {
       await this.ports.vault.delete(invocation.inputBlobKey);
+      await this.ports.repository.markInputDeleted?.(
+        invocation.id,
+        this.ports.now().toISOString(),
+      );
       await this.ports.repository.transition({
         id: invocation.id,
         from: "EXECUTING",
-        to: "EXECUTION_FAILED",
+        to: "FAILED_NOT_CHARGED",
         expectedVersion: version,
         now: this.ports.now().toISOString(),
         errorCode: "HANDLER_FAILED",
@@ -166,6 +172,7 @@ export class InvocationQueueConsumer {
     }
     const executedAt = this.ports.now().toISOString();
     await this.ports.vault.delete(invocation.inputBlobKey);
+    await this.ports.repository.markInputDeleted?.(invocation.id, executedAt);
 
     let policy: SuccessPolicyDecision;
     try {
@@ -197,6 +204,7 @@ export class InvocationQueueConsumer {
       now: this.ports.now().toISOString(),
       candidateResultBlobKey: candidateBlob.key,
       resultDigest: candidateBlob.digest,
+      executedAt,
     });
     if (!ready) return "duplicate";
     version += 1;
@@ -214,19 +222,28 @@ export class InvocationQueueConsumer {
       await this.ports.vault.getJson(invocation.paymentBlobKey),
     );
     const settlement = await this.ports.settlement.settle(snapshot);
-    if (settlement.state !== "CHARGED") {
+    if (settlement.state === "NOT_CHARGED") {
+      await this.ports.repository.transition({
+        id: invocation.id,
+        from: "SETTLING",
+        to: "FAILED_NOT_CHARGED",
+        expectedVersion: version,
+        now: this.ports.now().toISOString(),
+        chargeState: "NOT_CHARGED",
+        errorCode: settlement.errorCode,
+      });
+      return "processed";
+    }
+    if (settlement.state === "SETTLEMENT_UNKNOWN") {
       await this.ports.repository.transition({
         id: invocation.id,
         from: "SETTLING",
         to: "SETTLEMENT_UNKNOWN",
         expectedVersion: version,
         now: this.ports.now().toISOString(),
-        chargeState:
-          settlement.state === "SETTLEMENT_UNKNOWN"
-            ? "SETTLEMENT_UNKNOWN"
-            : "NOT_CHARGED",
-        ...(settlement.state === "NOT_CHARGED"
-          ? { errorCode: settlement.errorCode }
+        chargeState: "SETTLEMENT_UNKNOWN",
+        ...(settlement.transactionHash
+          ? { transactionHash: settlement.transactionHash }
           : {}),
       });
       return "processed";
@@ -264,6 +281,10 @@ export class InvocationQueueConsumer {
       resultBlobKey: candidateBlob.key,
       resultDigest: candidateBlob.digest,
       transactionHash: settlement.transactionHash,
+      settledAt: settlement.confirmedAt,
+      resultExpiresAt: new Date(
+        new Date(settlement.confirmedAt).getTime() + 24 * 60 * 60_000,
+      ).toISOString(),
     });
     return "processed";
   }
