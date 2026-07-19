@@ -9,12 +9,18 @@ import {
   D1InvocationRepository,
   EncryptedBlobVault,
   InvocationService,
+  InvocationQueueConsumer,
   QuoteService,
+  ReceiptService,
+  SettlementService,
+  SuccessPolicy,
+  TimedHandlerRunner,
   type D1DatabasePort,
 } from "@agentpaykit/runtime-core";
 import { Hono } from "hono";
 
 import { createInvocationRoutes } from "./routes/invocations";
+import { processInvocationBatch } from "./queue";
 
 interface R2ObjectPort {
   arrayBuffer(): Promise<ArrayBuffer>;
@@ -30,6 +36,20 @@ interface QueuePort {
   send(value: unknown): Promise<unknown>;
 }
 
+interface ServiceBindingPort {
+  fetch(input: string | URL | Request, init?: RequestInit): Promise<Response>;
+}
+
+interface QueueMessagePort {
+  body: unknown;
+  ack(): void;
+  retry(): void;
+}
+
+interface QueueBatchPort {
+  messages: QueueMessagePort[];
+}
+
 interface RuntimeEnvironment {
   DB?: D1DatabasePort;
   BLOBS?: R2BucketPort;
@@ -38,6 +58,11 @@ interface RuntimeEnvironment {
   BLOB_ENCRYPTION_KEY_B64?: string;
   RUNTIME_SIGNING_SEED_B64?: string;
   RUNTIME_SIGNING_KEY_ID?: string;
+  RUNTIME_PUBLIC_URL?: string;
+  BASE_SEPOLIA_RPC_URL?: string;
+  BASE_MAINNET_RPC_URL?: string;
+  SKILL_HANDLER?: ServiceBindingPort;
+  SUCCESS_POLICY?: ServiceBindingPort;
 }
 
 const CROCKFORD = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
@@ -67,18 +92,30 @@ function isConfigured(
     environment.FACILITATOR_URL &&
     environment.BLOB_ENCRYPTION_KEY_B64 &&
     environment.RUNTIME_SIGNING_SEED_B64 &&
-    environment.RUNTIME_SIGNING_KEY_ID,
+    environment.RUNTIME_SIGNING_KEY_ID &&
+    environment.RUNTIME_PUBLIC_URL &&
+    environment.BASE_SEPOLIA_RPC_URL &&
+    environment.BASE_MAINNET_RPC_URL &&
+    environment.SKILL_HANDLER &&
+    environment.SUCCESS_POLICY,
   );
 }
 
-async function configuredApp(
+interface RuntimeServices {
+  app: Hono;
+  consumer: InvocationQueueConsumer;
+}
+
+async function configuredRuntime(
   environment: Required<RuntimeEnvironment>,
-  origin: string,
-): Promise<Hono> {
+): Promise<RuntimeServices> {
   const repository = new D1InvocationRepository(environment.DB);
   const challenge = await createOfficialPaymentChallengeIssuer({
     facilitatorUrl: environment.FACILITATOR_URL,
-    resourceUrl: new URL("/v1/invocations", origin).toString(),
+    resourceUrl: new URL(
+      "/v1/invocations",
+      environment.RUNTIME_PUBLIC_URL,
+    ).toString(),
   });
   const encryptionKey = decodeBase64(environment.BLOB_ENCRYPTION_KEY_B64);
   const signingSeed = decodeBase64(environment.RUNTIME_SIGNING_SEED_B64);
@@ -100,9 +137,9 @@ async function configuredApp(
     },
   });
   const releases = {
-    async get(id: string, target: "testnet" | "mainnet") {
+    async get(id: string, target?: "testnet" | "mainnet") {
       const release = await repository.getRelease(id);
-      return release?.environment === target ? release : undefined;
+      return !target || release?.environment === target ? release : undefined;
     },
   };
   const quoteService = new QuoteService({
@@ -163,11 +200,130 @@ async function configuredApp(
     now: () => new Date(),
     traceId: () => randomId("trc_"),
   });
-  return createInvocationRoutes({
-    quote: quoteService,
-    invocation: invocationService,
-    traceId: () => randomId("trc_"),
+  const handler = new TimedHandlerRunner<{
+    id: string;
+    maximumExecutionMs: number;
+  }>(async ({ input, invocationId, release }, signal) => {
+    const response = await environment.SKILL_HANDLER.fetch(
+      "https://skill-handler.internal/invoke",
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ invocationId, releaseId: release.id, input }),
+        signal,
+      },
+    );
+    if (!response.ok) throw new Error("HANDLER_FAILED");
+    return response.json();
   });
+  const policy = new SuccessPolicy(
+    (candidate) => candidate !== undefined,
+    async (candidate) => {
+      const response = await environment.SUCCESS_POLICY.fetch(
+        "https://success-policy.internal/evaluate",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ candidate }),
+        },
+      );
+      if (!response.ok) {
+        return { accepted: false, errorCode: "POLICY_EVALUATION_FAILED" };
+      }
+      const decision = (await response.json()) as {
+        accepted?: unknown;
+        errorCode?: unknown;
+      };
+      return decision.accepted === true
+        ? { accepted: true }
+        : {
+            accepted: false,
+            errorCode:
+              typeof decision.errorCode === "string"
+                ? decision.errorCode
+                : "POLICY_OUTPUT_REJECTED",
+          };
+    },
+  );
+  const settlement = new SettlementService({
+    settler: {
+      async settle(snapshot) {
+        const requirements = snapshot.paymentRequirements;
+        const adapter = await createOfficialPaymentAdapter({
+          config: parsePaymentConfig({
+            network: requirements.network,
+            amount: requirements.amount,
+            asset: requirements.asset,
+            payee: requirements.payTo,
+            facilitatorUrl: environment.FACILITATOR_URL,
+          }),
+          method: "POST",
+          path: "/v1/invocations",
+        });
+        return adapter.settle(snapshot);
+      },
+    },
+    chain: {
+      async confirm(transactionHash, network) {
+        const rpcUrl =
+          network === "eip155:84532"
+            ? environment.BASE_SEPOLIA_RPC_URL
+            : environment.BASE_MAINNET_RPC_URL;
+        const response = await fetch(rpcUrl, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            id: 1,
+            method: "eth_getTransactionReceipt",
+            params: [transactionHash],
+          }),
+        });
+        const rpc = (await response.json()) as {
+          result?: { status?: string } | null;
+        };
+        return {
+          confirmed: response.ok && rpc.result?.status === "0x1",
+          ...(response.ok && rpc.result?.status === "0x1"
+            ? { confirmedAt: new Date().toISOString() }
+            : {}),
+        };
+      },
+    },
+  });
+  const receipts = new ReceiptService({
+    vault,
+    signer: {
+      sign: (payload) =>
+        signCanonical("runtime-receipt-v1", payload, {
+          keyId: environment.RUNTIME_SIGNING_KEY_ID,
+          privateKeySeed: signingSeed,
+        }),
+    },
+  });
+  const consumer = new InvocationQueueConsumer({
+    repository,
+    releases,
+    vault,
+    handler,
+    policy,
+    settlement,
+    receipts,
+    reconciliation: {
+      async reconcile() {
+        throw new Error("RECONCILIATION_PENDING");
+      },
+    },
+    now: () => new Date(),
+  });
+  return {
+    app: createInvocationRoutes({
+      quote: quoteService,
+      invocation: invocationService,
+      traceId: () => randomId("trc_"),
+    }),
+    consumer,
+  };
 }
 
 function unavailableApp(): Hono {
@@ -179,7 +335,7 @@ function unavailableApp(): Hono {
   return app;
 }
 
-const appCache = new WeakMap<object, Promise<Hono>>();
+const runtimeCache = new WeakMap<object, Promise<RuntimeServices>>();
 
 export default {
   async fetch(
@@ -189,12 +345,27 @@ export default {
     if (!isConfigured(environment)) {
       return unavailableApp().fetch(request, environment);
     }
-    let app = appCache.get(environment);
-    if (!app) {
-      app = configuredApp(environment, new URL(request.url).origin);
-      appCache.set(environment, app);
+    let runtime = runtimeCache.get(environment);
+    if (!runtime) {
+      runtime = configuredRuntime(environment);
+      runtimeCache.set(environment, runtime);
     }
-    return (await app).fetch(request, environment);
+    return (await runtime).app.fetch(request, environment);
+  },
+  async queue(
+    batch: QueueBatchPort,
+    environment: RuntimeEnvironment,
+  ): Promise<void> {
+    if (!isConfigured(environment)) {
+      for (const message of batch.messages) message.retry();
+      return;
+    }
+    let runtime = runtimeCache.get(environment);
+    if (!runtime) {
+      runtime = configuredRuntime(environment);
+      runtimeCache.set(environment, runtime);
+    }
+    await processInvocationBatch(batch, (await runtime).consumer);
   },
 };
 

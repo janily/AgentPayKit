@@ -74,6 +74,7 @@ export interface NewRelease {
   amount: string;
   asset: string;
   payee: string;
+  maximumExecutionMs: number;
   now: string;
 }
 
@@ -86,6 +87,7 @@ export interface ReleaseRecord {
   amount: string;
   asset: `0x${string}`;
   payee: `0x${string}`;
+  maximumExecutionMs: number;
   createdAt: string;
 }
 
@@ -182,8 +184,9 @@ export class D1InvocationRepository {
     await this.database
       .prepare(
         `INSERT INTO releases
-          (id, package_digest, publisher_id, network, environment, amount, asset, payee, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          (id, package_digest, publisher_id, network, environment, amount, asset, payee,
+           maximum_execution_ms, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .bind(
         release.id,
@@ -194,6 +197,7 @@ export class D1InvocationRepository {
         release.amount,
         release.asset,
         release.payee,
+        release.maximumExecutionMs,
         release.now,
       )
       .run();
@@ -212,6 +216,7 @@ export class D1InvocationRepository {
         amount: string;
         asset: `0x${string}`;
         payee: `0x${string}`;
+        maximum_execution_ms: number;
         created_at: string;
       }>();
     return row
@@ -224,6 +229,7 @@ export class D1InvocationRepository {
           amount: row.amount,
           asset: row.asset,
           payee: row.payee,
+          maximumExecutionMs: row.maximum_execution_ms,
           createdAt: row.created_at,
         }
       : undefined;
@@ -319,6 +325,29 @@ export class D1InvocationRepository {
       .bind(id)
       .first<InvocationRow>();
     return row ? invocationRecord(row) : undefined;
+  }
+
+  async createReceipt(input: {
+    invocationId: string;
+    receiptBlobKey: string;
+    receiptDigest: string;
+    transactionHash: string;
+    now: string;
+  }): Promise<void> {
+    await this.database
+      .prepare(
+        `INSERT INTO receipts
+          (invocation_id, receipt_blob_key, receipt_digest, transaction_hash, created_at)
+         VALUES (?, ?, ?, ?, ?)`,
+      )
+      .bind(
+        input.invocationId,
+        input.receiptBlobKey,
+        input.receiptDigest,
+        input.transactionHash,
+        input.now,
+      )
+      .run();
   }
 
   async transition(input: TransitionInvocation): Promise<boolean> {

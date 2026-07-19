@@ -21,3 +21,11 @@ queue = "agentpaykit-invocations"
 queue = "agentpaykit-invocations"
 max_batch_size = 10
 max_batch_timeout = 5
+
+[[services]]
+binding = "SKILL_HANDLER"
+service = "agentpaykit-skill-handler"
+
+[[services]]
+binding = "SUCCESS_POLICY"
+service = "agentpaykit-success-policy"

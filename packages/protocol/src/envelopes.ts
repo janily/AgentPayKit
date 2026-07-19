@@ -56,6 +56,25 @@ export interface ResultEnvelope {
   result: unknown;
 }
 
+export interface ReceiptEnvelope {
+  schemaVersion: "1";
+  invocationId: InvocationId;
+  releaseId: ReleaseId;
+  inputDigest: InputDigest;
+  payer: `0x${string}`;
+  payee: `0x${string}`;
+  network: "eip155:84532" | "eip155:8453";
+  asset: `0x${string}`;
+  amount: string;
+  transactionHash: `0x${string}`;
+  executionStartedAt: string;
+  executedAt: string;
+  settledAt: string;
+  resultDigest: `sha256:${string}`;
+}
+
+export type SignedReceipt = SignedEnvelope<ReceiptEnvelope>;
+
 function record(value: unknown, label: string): Record<string, unknown> {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     throw new TypeError(`${label} must be an object`);

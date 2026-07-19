@@ -61,6 +61,7 @@ describe("D1 invocation repository", () => {
       amount: "10000",
       asset: `0x${"a".repeat(40)}`,
       payee: `0x${"b".repeat(40)}`,
+      maximumExecutionMs: 300_000,
       now: baseInvocation.now,
     });
     await repository.createQuote({
