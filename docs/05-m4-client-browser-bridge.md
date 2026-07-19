@@ -64,18 +64,18 @@ interface AgentPayClient {
 
 **Files:** Create `packages/cli/src/{main,commands/invoke,commands/status,commands/resume,commands/spend,output}.ts`, CLI contract tests.
 
-- [ ] Snapshot 测试人类输出与稳定 `--json` schema；所有错误含 `code` 与 `chargeState`。
-- [ ] 测试 `process.platform !== "darwin"` 在任何网络调用前失败。
-- [ ] 运行 CLI tests；预期命令不存在失败。
-- [ ] 实现 `agentpay invoke|status|resume|spend`；SIGINT 保存 invocation handle，输出恢复命令。
-- [ ] 将钱包拒绝/verify/handler/settle timeout/result expired 映射到准确 ChargeState，不统一显示“支付失败”。
-- [ ] 运行 `pnpm --filter @agentpaykit/cli test && pnpm --filter @agentpaykit/cli build`。
-- [ ] 提交：`git commit -m "feat(cli): expose recoverable paid-skill commands"`。
+- [x] Snapshot 测试人类输出与稳定 `--json` schema；所有错误含 `code` 与 `chargeState`。
+- [x] 测试 `process.platform !== "darwin"` 在任何网络调用前失败。
+- [x] 运行 CLI tests；预期命令不存在失败。
+- [x] 实现 `agentpay invoke|status|resume|spend`；SIGINT 保存 invocation handle，输出恢复命令。
+- [x] 将钱包拒绝/verify/handler/settle timeout/result expired 映射到准确 ChargeState，不统一显示“支付失败”。
+- [x] 运行 `pnpm --filter @agentpaykit/cli test && pnpm --filter @agentpaykit/cli build`。
+- [x] 提交：`git commit -m "feat(cli): expose recoverable paid-skill commands"`。
 
 ## M4 Definition of Done
 
-- [ ] macOS 上 fake-runtime 完整授权与 resume 流通过。
-- [ ] Linux CI 只验证 `UNSUPPORTED_PLATFORM`，不启动 Bridge、不联网。
-- [ ] 并发预算测试无超支。
-- [ ] Bridge security tests 覆盖 token 重放、CSRF、Origin、TTL、关闭清理。
-- [ ] 代码和日志扫描未发现私钥、payload、完整输入或远程 UI 资源。
+- [x] macOS 上 fake-runtime 完整授权与 resume 流通过。
+- [x] Linux CI 只验证 `UNSUPPORTED_PLATFORM`，不启动 Bridge、不联网。
+- [x] 并发预算测试无超支。
+- [x] Bridge security tests 覆盖 token 重放、CSRF、Origin、TTL、关闭清理。
+- [x] 代码和日志扫描未发现私钥、payload、完整输入或远程 UI 资源。

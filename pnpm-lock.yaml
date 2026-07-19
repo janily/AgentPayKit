@@ -138,6 +138,16 @@ importers:
         version: 2.1.9(@types/node@24.13.3)
 
   packages/cli:
+    dependencies:
+      '@agentpaykit/browser-bridge':
+        specifier: workspace:^
+        version: link:../browser-bridge
+      '@agentpaykit/client':
+        specifier: workspace:^
+        version: link:../client
+      '@agentpaykit/protocol':
+        specifier: workspace:^
+        version: link:../protocol
     devDependencies:
       '@agentpaykit/tsconfig':
         specifier: workspace:*

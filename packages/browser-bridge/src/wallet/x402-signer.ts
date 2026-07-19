@@ -115,8 +115,7 @@ export class OfficialX402WalletSigner {
     const headers = new x402HTTPClient(client).encodePaymentSignatureHeader(
       payload,
     );
-    const paymentSignature =
-      headers["PAYMENT-SIGNATURE"] ?? headers["X-PAYMENT"];
+    const paymentSignature = headers["PAYMENT-SIGNATURE"];
     if (!paymentSignature) {
       throw new WalletApprovalError("PAYMENT_PAYLOAD_CREATION_FAILED");
     }

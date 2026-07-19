@@ -16,5 +16,10 @@
     "@agentpaykit/tsconfig": "workspace:*",
     "typescript": "^5.6.3",
     "vitest": "^2.1.9"
+  },
+  "dependencies": {
+    "@agentpaykit/browser-bridge": "workspace:^",
+    "@agentpaykit/client": "workspace:^",
+    "@agentpaykit/protocol": "workspace:^"
   }
 }
