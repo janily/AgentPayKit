@@ -14,6 +14,8 @@
     "test": "vitest run --passWithNoTests"
   },
   "devDependencies": {
+    "@agentpaykit/payment": "workspace:*",
+    "@agentpaykit/protocol": "workspace:*",
     "@agentpaykit/tsconfig": "workspace:*",
     "typescript": "^5.6.3",
     "vitest": "^2.1.9"

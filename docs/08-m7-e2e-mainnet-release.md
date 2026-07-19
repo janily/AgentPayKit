@@ -21,10 +21,10 @@
 
 **Files:** Create `packages/testkit/src/{fixtures,fake-facilitator,fake-chain,fake-wallet,fake-providers,faults}.ts`, contract tests.
 
-- [ ] 写 fixture contract tests，固定 Release/Quote/Payload/Status/Receipt 的 schema 与签名；fake payload 明确标记非真实凭证。
-- [ ] 覆盖 verify reject、settle timeout/revert/success、AuthorizationUsed found/missing、Queue duplicate、R2/D1 failure、wallet refusal/wrong chain/insufficient funds。
-- [ ] 运行 testkit tests；预期 exports 缺失失败。
-- [ ] 实现可注入时钟/nonce/Invocation ID，禁止测试依赖 wall clock 或随机 flaky timing。
+- [x] 写 fixture contract tests，固定 Release/Quote/Payload/Status/Receipt 的 schema 与签名；fake payload 明确标记非真实凭证。
+- [x] 覆盖 verify reject、settle timeout/revert/success、AuthorizationUsed found/missing、Queue duplicate、R2/D1 failure、wallet refusal/wrong chain/insufficient funds。
+- [x] 运行 testkit tests；预期 exports 缺失失败。
+- [x] 实现可注入时钟/nonce/Invocation ID，禁止测试依赖 wall clock 或随机 flaky timing。
 - [ ] 提交：`git commit -m "testkit: add deterministic payment fault injection"`。
 
 ### Task 2: Automate the twelve acceptance scenarios

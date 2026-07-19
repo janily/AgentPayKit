@@ -323,6 +323,12 @@ importers:
 
   packages/testkit:
     devDependencies:
+      '@agentpaykit/payment':
+        specifier: workspace:*
+        version: link:../payment
+      '@agentpaykit/protocol':
+        specifier: workspace:*
+        version: link:../protocol
       '@agentpaykit/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
