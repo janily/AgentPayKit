@@ -11,11 +11,14 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests --exclude templates/**"
   },
   "devDependencies": {
     "@agentpaykit/tsconfig": "workspace:*",
     "typescript": "^5.6.3",
     "vitest": "^2.1.9"
+  },
+  "dependencies": {
+    "@agentpaykit/protocol": "workspace:^"
   }
 }

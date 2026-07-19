@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "1",
+  "name": "{{skillName}}",
+  "clientCompatibility": ">=0.1.0 <1.0.0",
+  "install": {
+    "sharedClientRequired": true,
+    "agents": ["codex", "claude-code"]
+  },
+  "processors": ["api.example.invalid"],
+  "maximumExecutionMs": 30000,
+  "inputSchema": "schemas/input.json",
+  "resultSchema": "schemas/result.json"
+}

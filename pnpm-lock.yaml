@@ -148,6 +148,9 @@ importers:
       '@agentpaykit/protocol':
         specifier: workspace:^
         version: link:../protocol
+      '@agentpaykit/publisher':
+        specifier: workspace:^
+        version: link:../publisher
     devDependencies:
       '@agentpaykit/tsconfig':
         specifier: workspace:*
@@ -240,6 +243,10 @@ importers:
         version: 2.1.9(@types/node@24.13.3)
 
   packages/publisher:
+    dependencies:
+      '@agentpaykit/protocol':
+        specifier: workspace:^
+        version: link:../protocol
     devDependencies:
       '@agentpaykit/tsconfig':
         specifier: workspace:*

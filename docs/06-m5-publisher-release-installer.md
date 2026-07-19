@@ -21,11 +21,11 @@
 
 **Files:** Create `packages/publisher/src/scaffold.ts`, `templates/paid-skill/**`, `packages/cli/src/commands/create.ts`, golden tests.
 
-- [ ] Golden test 运行 `create-agentpay-skill research-lite` 并比较完整文件树、manifest、Handler、Success Policy、schema 与 tests。
-- [ ] 运行测试；预期命令缺失失败。
-- [ ] 模板包含 Workers/Hono Handler、processor allowlist、maximum execution duration、testnet/mainnet config；不包含 secrets 或钱包私钥。
-- [ ] 生成项目执行 `pnpm install --frozen-lockfile && pnpm test && pnpm build` 成功。
-- [ ] 提交：`git commit -m "feat(publisher): scaffold paid skills"`。
+- [x] Golden test 运行 `create-agentpay-skill research-lite` 并比较完整文件树、manifest、Handler、Success Policy、schema 与 tests。
+- [x] 运行测试；预期命令缺失失败。
+- [x] 模板包含 Workers/Hono Handler、processor allowlist、maximum execution duration、testnet/mainnet config；不包含 secrets 或钱包私钥。
+- [x] 生成项目执行 `pnpm install --frozen-lockfile && pnpm test && pnpm build` 成功。
+- [x] 提交：`git commit -m "feat(publisher): scaffold paid skills"`。
 
 ### Task 2: Build, sign and verify immutable Releases
 

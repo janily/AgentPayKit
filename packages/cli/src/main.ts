@@ -1,5 +1,6 @@
 import type { InstalledSkill } from "@agentpaykit/client";
 
+import { createCommand } from "./commands/create";
 import { invokeCommand } from "./commands/invoke";
 import { resumeCommand } from "./commands/resume";
 import type { SpendSummary } from "./commands/spend";
@@ -33,7 +34,8 @@ function commandName(value: string | undefined): CliCommand {
   return value === "invoke" ||
     value === "status" ||
     value === "resume" ||
-    value === "spend"
+    value === "spend" ||
+    value === "create"
     ? value
     : "unknown";
 }
@@ -49,6 +51,8 @@ function humanSuccess(command: CliCommand, data: unknown): string {
       return JSON.stringify(value.result, null, 2);
     case "spend":
       return `Daily spend ${String(value.spent)}; held ${String(value.held)}; available ${String(value.available)} of ${String(value.limit)}`;
+    case "create":
+      return `Created paid skill at ${String(value.path)}`;
     default:
       return "";
   }
@@ -77,13 +81,15 @@ export async function runCli(
       throw Object.assign(new Error("USAGE"), { code: "USAGE" });
     }
     const data =
-      command === "invoke"
-        ? await invokeCommand(args, dependencies)
-        : command === "status"
-          ? await statusCommand(args, dependencies.client)
-          : command === "resume"
-            ? await resumeCommand(args, dependencies.client)
-            : await spendCommand(dependencies.spend);
+      command === "create"
+        ? await createCommand(args)
+        : command === "invoke"
+          ? await invokeCommand(args, dependencies)
+          : command === "status"
+            ? await statusCommand(args, dependencies.client)
+            : command === "resume"
+              ? await resumeCommand(args, dependencies.client)
+              : await spendCommand(dependencies.spend);
     if (interrupted && command === "invoke") {
       const invocation = data as Record<string, unknown>;
       throw Object.assign(new Error("INTERRUPTED"), {

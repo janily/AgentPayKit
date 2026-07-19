@@ -1,6 +1,7 @@
 import type { ChargeState } from "@agentpaykit/protocol";
 
-export type CliCommand = "invoke" | "status" | "resume" | "spend" | "unknown";
+export type CliCommand =
+  "invoke" | "status" | "resume" | "spend" | "create" | "unknown";
 
 export interface CliFailure {
   code: string;
