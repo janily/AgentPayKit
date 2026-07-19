@@ -63,16 +63,16 @@
 
 **Files:** Create `packages/publisher/src/deploy-preflight.ts`, `packages/cli/src/commands/release.ts`, `docs/runbooks/publisher-release.md`, tests.
 
-- [ ] 测试缺少 CDP/upstream/encryption secrets、错误 network、Release/config digest 漂移均阻止 deploy。
-- [ ] 实现 `agentpay release build|sign|verify|deploy --environment testnet|mainnet`；mainnet 强制二次文字确认且不复用 testnet Release。
-- [ ] 文档给出 Cloudflare secret 名称与 Wrangler 命令，但不写值。
-- [ ] 运行 publisher/CLI tests 和模板 dry-run；预期成功且无网络花费。
-- [ ] 提交：`git commit -m "feat(publisher): gate testnet and mainnet releases"`。
+- [x] 测试缺少 CDP/upstream/encryption secrets、错误 network、Release/config digest 漂移均阻止 deploy。
+- [x] 实现 `agentpay release build|sign|verify|deploy --environment testnet|mainnet`；mainnet 强制二次文字确认且不复用 testnet Release。
+- [x] 文档给出 Cloudflare secret 名称与 Wrangler 命令，但不写值。
+- [x] 运行 publisher/CLI tests 和模板 dry-run；预期成功且无网络花费。
+- [x] 提交：`git commit -m "feat(publisher): gate testnet and mainnet releases"`。
 
 ## M5 Definition of Done
 
-- [ ] 从空目录脚手架出的 Skill 可 test/build。
-- [ ] Release/Package 的篡改测试全部失败且安装目录零写入。
-- [ ] 一条 install 命令建立一个共享 Client 和两个 Agent 入口。
-- [ ] 重复安装幂等，失败注入可回滚，用户已有文件不丢失。
-- [ ] testnet/mainnet Release ID 不同；Publisher/Payee 字段可独立审计。
+- [x] 从空目录脚手架出的 Skill 可 test/build。
+- [x] Release/Package 的篡改测试全部失败且安装目录零写入。
+- [x] 一条 install 命令建立一个共享 Client 和两个 Agent 入口。
+- [x] 重复安装幂等，失败注入可回滚，用户已有文件不丢失。
+- [x] testnet/mainnet Release ID 不同；Publisher/Payee 字段可独立审计。

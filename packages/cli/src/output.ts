@@ -8,6 +8,7 @@ export type CliCommand =
   | "create"
   | "install"
   | "doctor"
+  | "release"
   | "unknown";
 
 export interface CliFailure {

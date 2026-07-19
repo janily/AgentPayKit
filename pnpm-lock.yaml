@@ -154,6 +154,9 @@ importers:
       '@agentpaykit/publisher':
         specifier: workspace:^
         version: link:../publisher
+      viem:
+        specifier: 2.55.2
+        version: 2.55.2(typescript@5.9.3)(zod@3.25.76)
     devDependencies:
       '@agentpaykit/tsconfig':
         specifier: workspace:*

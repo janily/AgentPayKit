@@ -22,6 +22,7 @@
     "@agentpaykit/client": "workspace:^",
     "@agentpaykit/installer": "workspace:^",
     "@agentpaykit/publisher": "workspace:^",
-    "@agentpaykit/protocol": "workspace:^"
+    "@agentpaykit/protocol": "workspace:^",
+    "viem": "2.55.2"
   }
 }

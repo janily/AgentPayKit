@@ -4,6 +4,7 @@ import { createCommand } from "./commands/create";
 import { doctorCommand } from "./commands/doctor";
 import { installCommand } from "./commands/install";
 import { invokeCommand } from "./commands/invoke";
+import { releaseCommand } from "./commands/release";
 import { resumeCommand } from "./commands/resume";
 import type { SpendSummary } from "./commands/spend";
 import { spendCommand } from "./commands/spend";
@@ -39,7 +40,8 @@ function commandName(value: string | undefined): CliCommand {
     value === "spend" ||
     value === "create" ||
     value === "install" ||
-    value === "doctor"
+    value === "doctor" ||
+    value === "release"
     ? value
     : "unknown";
 }
@@ -61,6 +63,8 @@ function humanSuccess(command: CliCommand, data: unknown): string {
       return `Installed skill at ${String(value.skillRoot)} for Codex and Claude Code`;
     case "doctor":
       return `Installation healthy: ${String(value.name)} ${String(value.releaseId)}`;
+    case "release":
+      return JSON.stringify(value, null, 2);
     default:
       return "";
   }
@@ -95,13 +99,15 @@ export async function runCli(
           ? await installCommand(args)
           : command === "doctor"
             ? await doctorCommand(args)
-            : command === "invoke"
-              ? await invokeCommand(args, dependencies)
-              : command === "status"
-                ? await statusCommand(args, dependencies.client)
-                : command === "resume"
-                  ? await resumeCommand(args, dependencies.client)
-                  : await spendCommand(dependencies.spend);
+            : command === "release"
+              ? await releaseCommand(args)
+              : command === "invoke"
+                ? await invokeCommand(args, dependencies)
+                : command === "status"
+                  ? await statusCommand(args, dependencies.client)
+                  : command === "resume"
+                    ? await resumeCommand(args, dependencies.client)
+                    : await spendCommand(dependencies.spend);
     if (interrupted && command === "invoke") {
       const invocation = data as Record<string, unknown>;
       throw Object.assign(new Error("INTERRUPTED"), {

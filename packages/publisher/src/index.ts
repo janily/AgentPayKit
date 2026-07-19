@@ -1,5 +1,6 @@
 export * from "./archive";
 export * from "./delegation";
+export * from "./deploy-preflight";
 export * from "./package-builder";
 export * from "./release-builder";
 export * from "./release-signer";
