@@ -36,16 +36,16 @@ flowchart TD
 
 ## Plan Set
 
-| Order | File | Deliverable | Gate |
-|---:|---|---|---|
-| 0 | `01-m0-fork-baseline.md` | Provenance、pnpm/Node 基线、CI | 原 PayBot 在新工具链可构建 |
-| 1 | `02-m1-prune-legacy-paybot.md` | 删除旧支付核心并保留 UI 骨架 | 生产依赖无旧合约/Facilitator |
-| 2 | `03-m2-official-x402-workers-spike.md` | 官方 x402 + Workers 同步兼容 Spike | Sepolia verify/settle 成功 |
-| 3 | `04-m3-async-runtime-settlement.md` | 协议、D1/Queue/R2、延迟结算 | 失败零收费；成功后收费 |
-| 4 | `05-m4-client-browser-bridge.md` | Client、预算、CLI、MetaMask Bridge | macOS 单次授权闭环 |
-| 5 | `06-m5-publisher-release-installer.md` | 发布、签名、打包、双 Agent 安装 | 一条命令启用两个 Agent |
-| 6 | `07-m6-deep-research-observability.md` | Deep Research Lite、日志、PayInsight | 0.01 USDC 示例通过 Policy |
-| 7 | `08-m7-e2e-mainnet-release.md` | 12 场景、安全、主网与外部验收 | PRD Definition of Done 全通过 |
+| Order | File                                   | Deliverable                          | Gate                          |
+| ----: | -------------------------------------- | ------------------------------------ | ----------------------------- |
+|     0 | `01-m0-fork-baseline.md`               | Provenance、pnpm/Node 基线、CI       | 原 PayBot 在新工具链可构建    |
+|     1 | `02-m1-prune-legacy-paybot.md`         | 删除旧支付核心并保留 UI 骨架         | 生产依赖无旧合约/Facilitator  |
+|     2 | `03-m2-official-x402-workers-spike.md` | 官方 x402 + Workers 同步兼容 Spike   | Sepolia verify/settle 成功    |
+|     3 | `04-m3-async-runtime-settlement.md`    | 协议、D1/Queue/R2、延迟结算          | 失败零收费；成功后收费        |
+|     4 | `05-m4-client-browser-bridge.md`       | Client、预算、CLI、MetaMask Bridge   | macOS 单次授权闭环            |
+|     5 | `06-m5-publisher-release-installer.md` | 发布、签名、打包、双 Agent 安装      | 一条命令启用两个 Agent        |
+|     6 | `07-m6-deep-research-observability.md` | Deep Research Lite、日志、PayInsight | 0.01 USDC 示例通过 Policy     |
+|     7 | `08-m7-e2e-mainnet-release.md`         | 12 场景、安全、主网与外部验收        | PRD Definition of Done 全通过 |
 
 ## Target Repository Boundary
 

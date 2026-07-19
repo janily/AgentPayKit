@@ -3,7 +3,9 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, test } from "vitest";
 
-const repositoryRoot = resolve(fileURLToPath(new URL("../..", import.meta.url)));
+const repositoryRoot = resolve(
+  fileURLToPath(new URL("../..", import.meta.url)),
+);
 
 test("records the pinned PayBot repository provenance", async () => {
   const baseline = await readFile(

@@ -26,7 +26,9 @@
 - [ ] 实现并导出固定接口：
 
 ```ts
-interface PaymentVerifier { verify(input: VerifyPaymentInput): Promise<VerifiedPayment>; }
+interface PaymentVerifier {
+  verify(input: VerifyPaymentInput): Promise<VerifiedPayment>;
+}
 interface PaymentSettler {
   settle(input: SettlePaymentInput): Promise<SettlementResult>;
   reconcile(input: ReconcilePaymentInput): Promise<SettlementState>;

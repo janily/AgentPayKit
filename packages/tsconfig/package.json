@@ -1,7 +1,7 @@
 {
-  "name": "@paybot/tsconfig",
+  "name": "@agentpaykit/tsconfig",
   "version": "1.0.0",
-  "description": "Shared TypeScript configurations for Paybot monorepo",
+  "description": "Shared strict TypeScript configurations for AgentPayKit",
   "private": true,
   "files": [
     "base.json",

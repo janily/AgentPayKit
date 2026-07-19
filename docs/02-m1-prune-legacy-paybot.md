@@ -41,7 +41,14 @@
 核心扫描规则：
 
 ```ts
-const forbidden = [/QUSDToken/, /Escrow\.sol/, /hardhat/i, /evm-permit/, /X-PAYMENT/, /x402CheckOnly/];
+const forbidden = [
+  /QUSDToken/,
+  /Escrow\.sol/,
+  /hardhat/i,
+  /evm-permit/,
+  /X-PAYMENT/,
+  /x402CheckOnly/,
+];
 expect(matches).toEqual([]);
 ```
 

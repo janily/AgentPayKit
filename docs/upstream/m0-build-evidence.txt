@@ -1,0 +1,27 @@
+AgentPayKit M0 build evidence
+Captured: 2026-07-19 (Asia/Shanghai)
+Node.js: v22.23.1
+pnpm: 9.15.9
+
+Repository gates
+- provenance.test.ts: 1 passed
+- toolchain.test.ts: 1 passed
+- assert-clean-build.test.ts: 2 passed
+- merge-base ancestor 1d6d3f4ac33e2a338e068cdfb80a67f63544a8e1: yes
+
+Repeatable verification
+- pnpm verify run 1: exit 0
+- pnpm verify run 2: exit 0
+- format:check: passed
+- lint: 11 workspace tasks passed
+- typecheck: 11 workspace tasks passed
+- workspace tests: 11 tasks passed (empty boundary packages explicitly allow no tests)
+- repository/security tests: 5 files, 6 tests passed
+- build: 11 workspace tasks passed
+
+Frozen lockfile gate
+- pnpm install --frozen-lockfile --offline: exit 0
+- pnpm-lock.yaml SHA-256 before: a03182a28b79c3b6b208d62ff60d3889d64a4235f89397ec749c689ba82a693c
+- pnpm-lock.yaml SHA-256 after:  a03182a28b79c3b6b208d62ff60d3889d64a4235f89397ec749c689ba82a693c
+
+No chain credentials or transactions were used by these commands.

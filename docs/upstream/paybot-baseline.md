@@ -12,12 +12,12 @@ change after this capture.
 
 ## Reuse and removal boundary
 
-| Status | Paths | Decision |
-| --- | --- | --- |
-| Reuse | `LICENSE` | Retain unchanged; it is the upstream MIT license. |
-| Reuse | The pinned Git history at the commit above | Treat as read-only provenance for comparison, not as a migration target in M0. |
-| Remove in M1 | `packages/contracts/` | Legacy PayBot contract artifacts and their tests are scheduled for removal. |
-| Remove in M1 | `packages/x402/` | Legacy custom x402 implementation is scheduled for removal. |
+| Status       | Paths                                      | Decision                                                                       |
+| ------------ | ------------------------------------------ | ------------------------------------------------------------------------------ |
+| Reuse        | `LICENSE`                                  | Retain unchanged; it is the upstream MIT license.                              |
+| Reuse        | The pinned Git history at the commit above | Treat as read-only provenance for comparison, not as a migration target in M0. |
+| Remove in M1 | `packages/contracts/`                      | Legacy PayBot contract artifacts and their tests are scheduled for removal.    |
+| Remove in M1 | `packages/x402/`                           | Legacy custom x402 implementation is scheduled for removal.                    |
 
 This M0 capture does not repair, compile, remove, or otherwise alter those
 legacy paths.

@@ -1,0 +1,17 @@
+{
+  "name": "@agentpaykit/runtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "@agentpaykit/tsconfig": "workspace:*",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.9"
+  }
+}

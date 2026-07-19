@@ -48,7 +48,11 @@ expect(license).toContain("MIT License");
 根配置必须包含：
 
 ```json
-{"private":true,"packageManager":"pnpm@9.15.9","engines":{"node":">=22 <23"}}
+{
+  "private": true,
+  "packageManager": "pnpm@9.15.9",
+  "engines": { "node": ">=22 <23" }
+}
 ```
 
 ### Task 3: Add repeatable baseline CI
