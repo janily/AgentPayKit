@@ -5,6 +5,7 @@ export type SignatureDomain =
   | "runtime-status-v1"
   | "runtime-result-v1"
   | "runtime-receipt-v1"
+  | "runtime-delegation-v1"
   | "release-v1";
 
 export interface CanonicalSignature {

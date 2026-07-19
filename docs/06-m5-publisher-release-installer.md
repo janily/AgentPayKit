@@ -31,12 +31,12 @@
 
 **Files:** Create `packages/publisher/src/{release-builder,release-signer,release-verifier,delegation}.ts`, fixtures/tests; extend protocol schemas.
 
-- [ ] Golden tests 固定 canonical Release bytes、Release ID、signature recovery 和 Runtime Delegation；一字节篡改必须失败。
-- [ ] 测试相同源码但 network 不同产生不同 Release ID，且 mainnet Release 不能接受 Sepolia delegation。
-- [ ] 运行测试；预期 builder 缺失失败。
-- [ ] 外部钱包签署 domain-separated Release；默认 recovered signer 等于 Payee，但字段仍分别编码。
-- [ ] `release verify` 离线验证 schema、digest、publisher signature、payee binding、runtime delegation 和 expiry。
-- [ ] 提交：`git commit -m "feat(publisher): sign immutable paid-skill releases"`。
+- [x] Golden tests 固定 canonical Release bytes、Release ID、signature recovery 和 Runtime Delegation；一字节篡改必须失败。
+- [x] 测试相同源码但 network 不同产生不同 Release ID，且 mainnet Release 不能接受 Sepolia delegation。
+- [x] 运行测试；预期 builder 缺失失败。
+- [x] 外部钱包签署 domain-separated Release；默认 recovered signer 等于 Payee，但字段仍分别编码。
+- [x] `release verify` 离线验证 schema、digest、publisher signature、payee binding、runtime delegation 和 expiry。
+- [x] 提交：`git commit -m "feat(publisher): sign immutable paid-skill releases"`。
 
 ### Task 3: Build deterministic Skill Packages
 
