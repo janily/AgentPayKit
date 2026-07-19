@@ -52,12 +52,12 @@
 
 **Files:** Create `packages/installer/src/{preflight,layout,transaction,install,uninstall}.ts`, fixtures for Codex/Claude Code, integration tests; add CLI `install` and `doctor`.
 
-- [ ] 在临时 HOME 中测试：首次安装、重复安装、兼容 Client 复用、升级、名称冲突、篡改、磁盘写失败回滚、卸载保留共享 Client。
-- [ ] 运行测试；预期 installer 缺失失败。
-- [ ] 固定顺序：macOS preflight → Package/Release verify → stage → install/reuse Client → install Skill → Codex link → Claude Code link → doctor → atomic commit。
-- [ ] 任一步失败回滚 staging 与本次新写内容；既有用户文件不覆盖。
-- [ ] Client 缺失且仅复制 Skill 时返回 `AGENTPAY_CLIENT_MISSING` 和明确的 `agentpay install-client` 命令。
-- [ ] 提交：`git commit -m "feat(installer): install one skill for Codex and Claude Code"`。
+- [x] 在临时 HOME 中测试：首次安装、重复安装、兼容 Client 复用、升级、名称冲突、篡改、磁盘写失败回滚、卸载保留共享 Client。
+- [x] 运行测试；预期 installer 缺失失败。
+- [x] 固定顺序：macOS preflight → Package/Release verify → stage → install/reuse Client → install Skill → Codex link → Claude Code link → doctor → atomic commit。
+- [x] 任一步失败回滚 staging 与本次新写内容；既有用户文件不覆盖。
+- [x] Client 缺失且仅复制 Skill 时返回 `AGENTPAY_CLIENT_MISSING` 和明确的 `agentpay install-client` 命令。
+- [x] 提交：`git commit -m "feat(installer): install one skill for Codex and Claude Code"`。
 
 ### Task 5: Add publisher deployment preflight
 

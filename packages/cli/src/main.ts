@@ -1,6 +1,8 @@
 import type { InstalledSkill } from "@agentpaykit/client";
 
 import { createCommand } from "./commands/create";
+import { doctorCommand } from "./commands/doctor";
+import { installCommand } from "./commands/install";
 import { invokeCommand } from "./commands/invoke";
 import { resumeCommand } from "./commands/resume";
 import type { SpendSummary } from "./commands/spend";
@@ -35,7 +37,9 @@ function commandName(value: string | undefined): CliCommand {
     value === "status" ||
     value === "resume" ||
     value === "spend" ||
-    value === "create"
+    value === "create" ||
+    value === "install" ||
+    value === "doctor"
     ? value
     : "unknown";
 }
@@ -53,6 +57,10 @@ function humanSuccess(command: CliCommand, data: unknown): string {
       return `Daily spend ${String(value.spent)}; held ${String(value.held)}; available ${String(value.available)} of ${String(value.limit)}`;
     case "create":
       return `Created paid skill at ${String(value.path)}`;
+    case "install":
+      return `Installed skill at ${String(value.skillRoot)} for Codex and Claude Code`;
+    case "doctor":
+      return `Installation healthy: ${String(value.name)} ${String(value.releaseId)}`;
     default:
       return "";
   }
@@ -83,13 +91,17 @@ export async function runCli(
     const data =
       command === "create"
         ? await createCommand(args)
-        : command === "invoke"
-          ? await invokeCommand(args, dependencies)
-          : command === "status"
-            ? await statusCommand(args, dependencies.client)
-            : command === "resume"
-              ? await resumeCommand(args, dependencies.client)
-              : await spendCommand(dependencies.spend);
+        : command === "install"
+          ? await installCommand(args)
+          : command === "doctor"
+            ? await doctorCommand(args)
+            : command === "invoke"
+              ? await invokeCommand(args, dependencies)
+              : command === "status"
+                ? await statusCommand(args, dependencies.client)
+                : command === "resume"
+                  ? await resumeCommand(args, dependencies.client)
+                  : await spendCommand(dependencies.spend);
     if (interrupted && command === "invoke") {
       const invocation = data as Record<string, unknown>;
       throw Object.assign(new Error("INTERRUPTED"), {

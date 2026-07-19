@@ -3,6 +3,8 @@ import { createDefaultDependencies } from "./default-dependencies";
 import { runCli } from "./main";
 
 export * from "./commands/create";
+export * from "./commands/doctor";
+export * from "./commands/install";
 export * from "./commands/invoke";
 export * from "./commands/resume";
 export * from "./commands/spend";

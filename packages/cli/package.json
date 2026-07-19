@@ -20,6 +20,7 @@
   "dependencies": {
     "@agentpaykit/browser-bridge": "workspace:^",
     "@agentpaykit/client": "workspace:^",
+    "@agentpaykit/installer": "workspace:^",
     "@agentpaykit/publisher": "workspace:^",
     "@agentpaykit/protocol": "workspace:^"
   }

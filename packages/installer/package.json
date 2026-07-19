@@ -16,6 +16,10 @@
   "devDependencies": {
     "@agentpaykit/tsconfig": "workspace:*",
     "typescript": "^5.6.3",
+    "viem": "2.55.2",
     "vitest": "^2.1.9"
+  },
+  "dependencies": {
+    "@agentpaykit/publisher": "workspace:^"
   }
 }
