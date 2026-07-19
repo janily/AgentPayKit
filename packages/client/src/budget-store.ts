@@ -1,8 +1,8 @@
-import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import type { DatabaseSync } from "node:sqlite";
 
 import { BudgetPolicy } from "./budget-policy";
+import { LOCAL_BUDGET_SCHEMA } from "./local-schema";
 
 const { DatabaseSync: NodeDatabaseSync } = createRequire(import.meta.url)(
   "node:sqlite",
@@ -48,12 +48,7 @@ export class BudgetStore {
 
   constructor(path: string) {
     this.database = new NodeDatabaseSync(path);
-    this.database.exec(
-      readFileSync(
-        new URL("../migrations/001_local.sql", import.meta.url),
-        "utf8",
-      ),
-    );
+    this.database.exec(LOCAL_BUDGET_SCHEMA);
   }
 
   configure(input: { singleLimit: string; dailyLimit: string }): void {

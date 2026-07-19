@@ -41,10 +41,10 @@
 
 **Files:** Create `tests/security/{package-tamper,release-conflict,bridge-csrf,secret-scan,log-leak,bundle-scan}.test.ts`, `tests/integration/dual-agent-install.test.ts`, reports.
 
-- [ ] 篡改 Package/Release 后验证安装目录零写入；Bridge 重放/CSRF/remote host 全拒绝。
-- [ ] 扫描 source、bundle、fixtures、logs、evidence，拒绝 key、seed、Payment Payload、完整输入标记。
-- [ ] 在隔离 HOME 一条命令安装，分别从 Codex 与 Claude Code adapter 调用同一 fake Runtime，并断言共享 Client inode/path 相同。
-- [ ] 运行 `pnpm vitest run tests/security tests/integration/dual-agent-install.test.ts`；预期全部通过。
+- [x] 篡改 Package/Release 后验证安装目录零写入；Bridge 重放/CSRF/remote host 全拒绝。
+- [x] 扫描 source、bundle、fixtures、logs、evidence，拒绝 key、seed、Payment Payload、完整输入标记。
+- [x] 在隔离 HOME 一条命令安装，分别从 Codex 与 Claude Code adapter 调用同一 fake Runtime，并断言共享 Client inode/path 相同。
+- [x] 运行 `pnpm vitest run tests/security tests/integration/dual-agent-install.test.ts`；预期全部通过。
 - [ ] 提交：`git commit -m "test(security): gate package bridge logs and dual-agent install"`。
 
 ### Task 4: Execute the Base Sepolia release gate

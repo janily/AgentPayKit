@@ -191,7 +191,9 @@ export async function createDefaultDependencies(): Promise<CliDependencies> {
     },
     paymentAuthorizer: {
       async authorize({ paymentRequired, quote }) {
-        const bridge = await LoopbackBridgeServer.start();
+        const bridge = await LoopbackBridgeServer.start({
+          staticRoot: new URL("./bridge/", import.meta.url),
+        });
         try {
           const session = bridge.createSession({
             invocationId: quote.invocationId,
