@@ -115,6 +115,32 @@ function fixture() {
         signature,
       };
     }),
+    receipt: vi.fn(async () => {
+      order.push("receipt");
+      return {
+        payload: {
+          schemaVersion: "1",
+          invocationId,
+          releaseId,
+          inputDigest,
+          payer: `0x${"3".repeat(40)}`,
+          payee: `0x${"2".repeat(40)}`,
+          network: "eip155:84532",
+          asset: `0x${"1".repeat(40)}`,
+          amount: "10000",
+          transactionHash: `0x${"f".repeat(64)}`,
+          executionStartedAt: "2026-07-19T00:00:02.000Z",
+          executedAt: "2026-07-19T00:02:00.000Z",
+          settledAt: "2026-07-19T00:03:00.000Z",
+          resultDigest: `sha256:${"9".repeat(64)}`,
+        },
+        signature: {
+          ...signature,
+          value:
+            "ErhqhgkFO7YARTK-G4Cc2qNmiKQkPL-4IlFlKQ2LNocZEy07QleUYM0dVVB2hyIZF2kvYbmc1IsXLqJ6VWJhCg",
+        },
+      };
+    }),
   };
   const client = new AgentPayClient({
     releaseVerifier: {
@@ -219,6 +245,66 @@ describe("AgentPayClient", () => {
     expect(built.order).not.toContain("authorize");
   });
 
+  test("does not open the wallet or send input when budget reservation fails", async () => {
+    const built = fixture();
+    built.client.portsForTest.budget = {
+      reserve: vi.fn(async () => {
+        throw new ClientContractError("BUDGET_EXCEEDED");
+      }),
+      authorize: vi.fn(),
+      markUnknown: vi.fn(),
+      release: vi.fn(),
+      settle: vi.fn(),
+    };
+
+    await expect(
+      built.client.invoke(skill, { secret: "never-sent" }),
+    ).rejects.toMatchObject({ code: "BUDGET_EXCEEDED" });
+    expect(built.order).not.toContain("authorize");
+    expect(built.runtime.invoke).not.toHaveBeenCalled();
+  });
+
+  test("releases a reservation when wallet authorization is rejected", async () => {
+    const built = fixture();
+    const budget = {
+      reserve: vi.fn(),
+      authorize: vi.fn(),
+      markUnknown: vi.fn(),
+      release: vi.fn(),
+      settle: vi.fn(),
+    };
+    built.client.portsForTest.budget = budget;
+    built.client.portsForTest.paymentAuthorizer.authorize = vi.fn(async () => {
+      throw new ClientContractError("WALLET_REJECTED");
+    });
+
+    await expect(built.client.invoke(skill, {})).rejects.toMatchObject({
+      code: "WALLET_REJECTED",
+    });
+    expect(budget.release).toHaveBeenCalledWith(invocationId);
+    expect(budget.markUnknown).not.toHaveBeenCalled();
+  });
+
+  test("keeps authorized budget held when invocation submission is uncertain", async () => {
+    const built = fixture();
+    const budget = {
+      reserve: vi.fn(),
+      authorize: vi.fn(),
+      markUnknown: vi.fn(),
+      release: vi.fn(),
+      settle: vi.fn(),
+    };
+    built.client.portsForTest.budget = budget;
+    built.runtime.invoke.mockRejectedValueOnce(new Error("network timeout"));
+
+    await expect(built.client.invoke(skill, {})).rejects.toThrow(
+      "network timeout",
+    );
+    expect(budget.authorize).toHaveBeenCalledWith(invocationId);
+    expect(budget.markUnknown).toHaveBeenCalledWith(invocationId);
+    expect(budget.release).not.toHaveBeenCalled();
+  });
+
   test("resume only queries signed status and result", async () => {
     const built = fixture();
     await built.client.invoke(skill, {});
@@ -238,6 +324,35 @@ describe("AgentPayClient", () => {
     ]);
     expect(built.runtime.quote).not.toHaveBeenCalled();
     expect(built.runtime.invoke).not.toHaveBeenCalled();
+  });
+
+  test("settles local budget only after verifying the signed Receipt", async () => {
+    const built = fixture();
+    const budget = {
+      reserve: vi.fn(),
+      authorize: vi.fn(),
+      markUnknown: vi.fn(),
+      release: vi.fn(),
+      settle: vi.fn(),
+    };
+    built.client.portsForTest.budget = budget;
+    await built.client.invoke(skill, {});
+    built.order.length = 0;
+
+    await built.client.resume(invocationId);
+
+    expect(built.order).toEqual([
+      "status",
+      "verify-runtime-status-v1",
+      "result",
+      "verify-runtime-result-v1",
+      "receipt",
+      "verify-runtime-receipt-v1",
+    ]);
+    expect(budget.settle).toHaveBeenCalledWith(
+      invocationId,
+      expect.stringMatching(/^sha256:[0-9a-f]{64}$/),
+    );
   });
 
   test("returns a recoverable handle when polling reaches its time limit", async () => {

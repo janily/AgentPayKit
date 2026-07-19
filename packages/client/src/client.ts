@@ -1,10 +1,12 @@
 import {
   assertExactFields,
+  digestJson,
   inputDigest as digestInput,
   parseInputDigest,
   parseInvocationId,
   parseQuoteId,
   parseReleaseId,
+  parseSignedReceipt,
   parseStatusEnvelope,
   verifyCanonicalSignature,
   type CanonicalSignature,
@@ -12,6 +14,7 @@ import {
   type InvocationId,
   type QuoteEnvelope,
   type ResultEnvelope,
+  type SignedReceipt,
   type SignedStatus,
   type SignatureDomain,
 } from "@agentpaykit/protocol";
@@ -58,6 +61,7 @@ export interface RuntimeClientPort {
     runtimeUrl: string,
     id: string,
   ): Promise<{ payload: ResultEnvelope; signature: CanonicalSignature }>;
+  receipt?(runtimeUrl: string, id: string): Promise<SignedReceipt>;
 }
 
 export interface InvocationHandle {
@@ -89,6 +93,17 @@ interface ClientPorts {
   bindings: {
     get(id: string): Promise<VerifiedInstalledSkill | undefined>;
     put(id: string, skill: VerifiedInstalledSkill): Promise<void>;
+  };
+  budget?: {
+    reserve(input: {
+      invocationId: string;
+      amount: string;
+      now: Date;
+    }): Promise<unknown>;
+    authorize(invocationId: string): Promise<void>;
+    markUnknown(invocationId: string): Promise<void>;
+    release(invocationId: string): Promise<void>;
+    settle(invocationId: string, receiptDigest: string): Promise<void>;
   };
   invocationId(): string;
   poll: {
@@ -246,26 +261,43 @@ export class AgentPayClient {
       quoted.signature,
       verified,
     );
-    const paymentSignature =
-      await this.portsForTest.paymentAuthorizer.authorize({
+    await this.portsForTest.budget?.reserve({
+      invocationId,
+      amount: quote.amount,
+      now: new Date(),
+    });
+    let paymentSignature: string;
+    try {
+      paymentSignature = await this.portsForTest.paymentAuthorizer.authorize({
         paymentRequired: quoted.paymentRequired,
         quote,
         skill: verified,
       });
-    const signedStatus = await this.portsForTest.runtime.invoke(
-      verified.runtime.url,
-      {
-        request: {
-          invocationId,
-          quoteId: quote.quoteId,
-          releaseId: verified.releaseId,
-          inputDigest: digest,
-          environment: verified.environment,
-          input,
+      await this.portsForTest.budget?.authorize(invocationId);
+    } catch (error) {
+      await this.portsForTest.budget?.release(invocationId);
+      throw error;
+    }
+    let signedStatus: SignedStatus;
+    try {
+      signedStatus = await this.portsForTest.runtime.invoke(
+        verified.runtime.url,
+        {
+          request: {
+            invocationId,
+            quoteId: quote.quoteId,
+            releaseId: verified.releaseId,
+            inputDigest: digest,
+            environment: verified.environment,
+            input,
+          },
+          paymentSignature,
         },
-        paymentSignature,
-      },
-    );
+      );
+    } catch (error) {
+      await this.portsForTest.budget?.markUnknown(invocationId);
+      throw error;
+    }
     const status = parseStatusEnvelope(signedStatus.payload);
     if (status.invocationId !== invocationId) {
       throw new ClientContractError("STATUS_BINDING_MISMATCH");
@@ -276,6 +308,7 @@ export class AgentPayClient {
       signedStatus.signature,
       verified,
     );
+    await this.syncBudgetStatus(status);
     return {
       invocationId,
       status: { payload: status, signature: signedStatus.signature },
@@ -305,6 +338,7 @@ export class AgentPayClient {
       signed.signature,
       skill,
     );
+    await this.syncBudgetStatus(payload);
     return { payload, signature: signed.signature };
   }
 
@@ -328,7 +362,43 @@ export class AgentPayClient {
       signed.signature,
       skill,
     );
+    if (this.portsForTest.budget && this.portsForTest.runtime.receipt) {
+      const signedReceipt = parseSignedReceipt(
+        await this.portsForTest.runtime.receipt(
+          skill.runtime.url,
+          invocationId,
+        ),
+      );
+      if (signedReceipt.payload.invocationId !== invocationId) {
+        throw new ClientContractError("RECEIPT_BINDING_MISMATCH");
+      }
+      await this.verifyRuntime(
+        "runtime-receipt-v1",
+        signedReceipt.payload,
+        signedReceipt.signature,
+        skill,
+      );
+      await this.portsForTest.budget.settle(
+        invocationId,
+        await digestJson(signedReceipt),
+      );
+    }
     return payload;
+  }
+
+  private async syncBudgetStatus(
+    status: SignedStatus["payload"],
+  ): Promise<void> {
+    if (!this.portsForTest.budget) return;
+    if (
+      status.chargeState === "NOT_CHARGED" &&
+      (status.status === "FAILED_NOT_CHARGED" ||
+        status.status === "POLICY_REJECTED")
+    ) {
+      await this.portsForTest.budget.release(status.invocationId);
+    } else if (status.chargeState === "SETTLEMENT_UNKNOWN") {
+      await this.portsForTest.budget.markUnknown(status.invocationId);
+    }
   }
 }
 

@@ -41,12 +41,12 @@ interface AgentPayClient {
 
 **Files:** Create `packages/client/src/{budget-store,budget-policy,reservations}.ts`, `migrations/001_local.sql`, concurrency tests.
 
-- [ ] 测试单笔/每日预算、并发 reservation、释放、已结算记账、未知结算保留额度、重复 receipt 不重复记账。
-- [ ] 运行测试；预期表/服务不存在失败。
-- [ ] 事务实现 `reserve → authorize → settled|released|unknown`；金额以 USDC atomic decimal text 存储并转 `bigint` 计算。
-- [ ] 日志与数据库不保存 raw input、payment payload 或钱包秘密。
-- [ ] 运行并发测试 100 次；预期无超支且余额恒等式成立。
-- [ ] 提交：`git commit -m "feat(client): enforce transactional local budgets"`。
+- [x] 测试单笔/每日预算、并发 reservation、释放、已结算记账、未知结算保留额度、重复 receipt 不重复记账。
+- [x] 运行测试；预期表/服务不存在失败。
+- [x] 事务实现 `reserve → authorize → settled|released|unknown`；金额以 USDC atomic decimal text 存储并转 `bigint` 计算。
+- [x] 日志与数据库不保存 raw input、payment payload 或钱包秘密。
+- [x] 运行并发测试 100 次；预期无超支且余额恒等式成立。
+- [x] 提交：`git commit -m "feat(client): enforce transactional local budgets"`。
 
 ### Task 3: Convert PayBot UI into secure loopback Browser Bridge
 

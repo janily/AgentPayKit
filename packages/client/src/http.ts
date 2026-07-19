@@ -1,6 +1,7 @@
 import type {
   CanonicalSignature,
   ResultEnvelope,
+  SignedReceipt,
   SignedStatus,
 } from "@agentpaykit/protocol";
 
@@ -75,5 +76,16 @@ export class RuntimeHttpClient implements RuntimeClientPort {
         new URL(`/v1/invocations/${encodeURIComponent(id)}/result`, runtimeUrl),
       ),
     )) as { payload: ResultEnvelope; signature: CanonicalSignature };
+  }
+
+  async receipt(runtimeUrl: string, id: string): Promise<SignedReceipt> {
+    return (await json(
+      await this.fetcher(
+        new URL(
+          `/v1/invocations/${encodeURIComponent(id)}/receipt`,
+          runtimeUrl,
+        ),
+      ),
+    )) as SignedReceipt;
   }
 }
