@@ -14,6 +14,7 @@ export class BoundedResearchHandler {
       model: ModelProvider;
       allowedProcessors: string[];
       now?: () => number;
+      logger?: { emit(event: unknown): void };
     },
   ) {}
 
@@ -57,6 +58,13 @@ export class BoundedResearchHandler {
       }),
     );
     budget.complete(generated.outputTokens, generated.costUsd);
+    this.ports.logger?.emit({
+      timestamp: new Date(now()).toISOString(),
+      level: "info",
+      event: "research.completed",
+      status: "RESULT_AVAILABLE",
+      durationMs: budget.durationMs(),
+    });
     return {
       report: generated.report,
       citations: generated.citations,

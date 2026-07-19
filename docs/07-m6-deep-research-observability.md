@@ -42,12 +42,12 @@
 
 **Files:** Create `packages/observability/src/{event,logger,redaction}.ts`, tests; integrate runtime/client/example call sites.
 
-- [ ] Property test 向 logger 输入私钥、API key、payload、raw input、provider body 和任意额外字段；序列化结果只能含 10 个批准业务字段。
-- [ ] 运行测试；预期 logger 缺失失败。
-- [ ] 实现 `AgentPayLogEvent`：timestamp、level、event、releaseId、invocationId、status、durationMs、amount、network、errorCode、traceId；写入前 pick allowlist。
-- [ ] 禁止异常原文直接返回或记录；用稳定 errorCode 和 traceId 关联。
-- [ ] 运行 `pnpm --filter @agentpaykit/observability test` 与 repository secret/log scan。
-- [ ] 提交：`git commit -m "feat(observability): emit allowlisted payment logs"`。
+- [x] Property test 向 logger 输入私钥、API key、payload、raw input、provider body 和任意额外字段；序列化结果只能含 10 个批准业务字段。
+- [x] 运行测试；预期 logger 缺失失败。
+- [x] 实现 `AgentPayLogEvent`：timestamp、level、event、releaseId、invocationId、status、durationMs、amount、network、errorCode、traceId；写入前 pick allowlist。
+- [x] 禁止异常原文直接返回或记录；用稳定 errorCode 和 traceId 关联。
+- [x] 运行 `pnpm --filter @agentpaykit/observability test` 与 repository secret/log scan。
+- [x] 提交：`git commit -m "feat(observability): emit allowlisted payment logs"`。
 
 ### Task 4: Implement user spend and Publisher PayInsight CLI
 
