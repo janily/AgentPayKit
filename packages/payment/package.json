@@ -17,5 +17,12 @@
     "@agentpaykit/tsconfig": "workspace:*",
     "typescript": "^5.6.3",
     "vitest": "^2.1.9"
+  },
+  "dependencies": {
+    "@x402/core": "2.19.0",
+    "@x402/evm": "2.19.0",
+    "@x402/extensions": "2.19.0",
+    "@x402/fetch": "2.19.0",
+    "@x402/hono": "2.19.0"
   }
 }
