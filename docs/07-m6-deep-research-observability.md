@@ -64,17 +64,17 @@
 
 **Files:** Complete `examples/paid-deep-research-lite/agentpay.json`, testnet/mainnet Release configs, package tests, `docs/acceptance/m6-example.md`.
 
-- [ ] 用 M5 Publisher 工具分别构建 testnet/mainnet Release 与 Package；断言价格相同、network/Release ID 不同。
-- [ ] fake provider full-flow 测试 quote → approve → execute → policy → settle → result → receipt。
-- [ ] retention 测试输入执行后删除、结果 24h 删除、元数据/Receipt 30d，结构化日志不超过 30d。
-- [ ] 运行 `pnpm --filter paid-deep-research-lite test && pnpm test --filter ./tests/integration`。
-- [ ] 记录 package/release digests 与脱敏测试证据。
-- [ ] 提交：`git commit -m "feat(example): publish Deep Research Lite package"`。
+- [x] 用 M5 Publisher 工具分别构建 testnet/mainnet Release 与 Package；断言价格相同、network/Release ID 不同。
+- [x] fake provider full-flow 测试 quote → approve → execute → policy → settle → result → receipt。
+- [x] retention 测试输入执行后删除、结果 24h 删除、元数据/Receipt 30d，结构化日志不超过 30d。
+- [x] 运行 `pnpm --filter paid-deep-research-lite test && pnpm test --filter ./tests/integration`。
+- [x] 记录 package/release digests 与脱敏测试证据。
+- [x] 提交：`git commit -m "feat(example): publish Deep Research Lite package"`。
 
 ## M6 Definition of Done
 
-- [ ] 所有硬上限与边界值测试通过。
-- [ ] Policy 失败样本 settle 调用数为零。
-- [ ] 日志 property/secret scan 泄露数为零。
-- [ ] 用户 CLI 与 PayInsight 的 `--json` schema 稳定且数据域分离。
-- [ ] testnet/mainnet 示例 Release 可离线验证且 ID 不同。
+- [x] 所有硬上限与边界值测试通过。
+- [x] Policy 失败样本 settle 调用数为零。
+- [x] 日志 property/secret scan 泄露数为零。
+- [x] 用户 CLI 与 PayInsight 的 `--json` schema 稳定且数据域分离。
+- [x] testnet/mainnet 示例 Release 可离线验证且 ID 不同。

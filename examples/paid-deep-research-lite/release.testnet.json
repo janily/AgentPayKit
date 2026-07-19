@@ -1,0 +1,6 @@
+{
+  "environment": "testnet",
+  "network": "eip155:84532",
+  "amount": "10000",
+  "maximumExecutionMs": 300000
+}

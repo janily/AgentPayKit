@@ -15,6 +15,9 @@
     "vitest": "^2.1.9"
   },
   "dependencies": {
-    "@agentpaykit/observability": "workspace:^"
+    "@agentpaykit/observability": "workspace:^",
+    "@agentpaykit/protocol": "workspace:^",
+    "@agentpaykit/publisher": "workspace:^",
+    "viem": "2.55.2"
   }
 }

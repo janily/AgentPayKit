@@ -1,0 +1,6 @@
+{
+  "environment": "mainnet",
+  "network": "eip155:8453",
+  "amount": "10000",
+  "maximumExecutionMs": 300000
+}

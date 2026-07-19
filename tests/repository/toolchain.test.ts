@@ -57,7 +57,7 @@ test("pins the pnpm and Node 22 toolchain without Bun", async () => {
     .filter((line) => line.startsWith("- "))
     .map((line) => line.slice(2));
 
-  expect(workspacePackages).toEqual(["apps/*", "packages/*"]);
+  expect(workspacePackages).toEqual(["apps/*", "examples/*", "packages/*"]);
 
   for (const packageManifestPath of packageManifestPaths) {
     const packageManifest = JSON.parse(

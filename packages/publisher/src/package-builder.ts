@@ -29,8 +29,11 @@ async function files(root: string): Promise<string[]> {
   const found: string[] = [];
   async function visit(directory: string): Promise<void> {
     for (const entry of await readdir(directory, { withFileTypes: true })) {
-      if (["node_modules", ".git", "dist", ".turbo"].includes(entry.name))
+      if (
+        ["node_modules", ".git", "dist", ".turbo", "test"].includes(entry.name)
+      )
         continue;
+      if (entry.name.endsWith(".tsbuildinfo")) continue;
       const path = join(directory, entry.name);
       const info = await lstat(path);
       if (info.isSymbolicLink()) throw new Error("SYMLINK_NOT_ALLOWED");
