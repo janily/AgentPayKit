@@ -164,6 +164,9 @@ importers:
       '@agentpaykit/installer':
         specifier: workspace:^
         version: link:../installer
+      '@agentpaykit/observability':
+        specifier: workspace:^
+        version: link:../observability
       '@agentpaykit/protocol':
         specifier: workspace:^
         version: link:../protocol

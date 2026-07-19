@@ -4,6 +4,8 @@ import { createCommand } from "./commands/create";
 import { doctorCommand } from "./commands/doctor";
 import { installCommand } from "./commands/install";
 import { invokeCommand } from "./commands/invoke";
+import { payInsightCommand } from "./commands/payinsight";
+import { receiptsCommand } from "./commands/receipts";
 import { releaseCommand } from "./commands/release";
 import { resumeCommand } from "./commands/resume";
 import type { SpendSummary } from "./commands/spend";
@@ -25,6 +27,8 @@ export interface CliDependencies {
   };
   loadSkill(path: string): Promise<InstalledSkill>;
   spend(): Promise<SpendSummary>;
+  receipts(): Promise<unknown>;
+  payInsight(filter: { releaseId?: string; status?: string }): Promise<unknown>;
   writeStdout(line: string): void;
   writeStderr(line: string): void;
   signals?: {
@@ -41,7 +45,9 @@ function commandName(value: string | undefined): CliCommand {
     value === "create" ||
     value === "install" ||
     value === "doctor" ||
-    value === "release"
+    value === "release" ||
+    value === "receipts" ||
+    value === "publisher"
     ? value
     : "unknown";
 }
@@ -64,6 +70,9 @@ function humanSuccess(command: CliCommand, data: unknown): string {
     case "doctor":
       return `Installation healthy: ${String(value.name)} ${String(value.releaseId)}`;
     case "release":
+      return JSON.stringify(value, null, 2);
+    case "receipts":
+    case "publisher":
       return JSON.stringify(value, null, 2);
     default:
       return "";
@@ -101,13 +110,26 @@ export async function runCli(
             ? await doctorCommand(args)
             : command === "release"
               ? await releaseCommand(args)
-              : command === "invoke"
-                ? await invokeCommand(args, dependencies)
-                : command === "status"
-                  ? await statusCommand(args, dependencies.client)
-                  : command === "resume"
-                    ? await resumeCommand(args, dependencies.client)
-                    : await spendCommand(dependencies.spend);
+              : command === "receipts"
+                ? await receiptsCommand(dependencies.receipts)
+                : command === "publisher"
+                  ? args[0] === "payinsight"
+                    ? await payInsightCommand(
+                        args.slice(1),
+                        dependencies.payInsight,
+                      )
+                    : Promise.reject(
+                        Object.assign(new Error("PUBLISHER_COMMAND_REQUIRED"), {
+                          code: "PUBLISHER_COMMAND_REQUIRED",
+                        }),
+                      )
+                  : command === "invoke"
+                    ? await invokeCommand(args, dependencies)
+                    : command === "status"
+                      ? await statusCommand(args, dependencies.client)
+                      : command === "resume"
+                        ? await resumeCommand(args, dependencies.client)
+                        : await spendCommand(dependencies.spend);
     if (interrupted && command === "invoke") {
       const invocation = data as Record<string, unknown>;
       throw Object.assign(new Error("INTERRUPTED"), {

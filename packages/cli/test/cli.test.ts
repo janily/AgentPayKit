@@ -39,6 +39,8 @@ function fixture(overrides: Partial<CliDependencies> = {}) {
       held: "5000",
       available: "985000",
     })),
+    receipts: vi.fn(async () => []),
+    payInsight: vi.fn(async () => ({ invocationCount: 0 })),
     writeStdout: (line) => stdout.push(line),
     writeStderr: (line) => stderr.push(line),
     ...overrides,
@@ -53,6 +55,8 @@ describe("agentpay CLI contract", () => {
       ["status", status.payload.invocationId, "--json"],
       ["resume", status.payload.invocationId, "--json"],
       ["spend", "--json"],
+      ["receipts", "--json"],
+      ["publisher", "payinsight", "--json"],
     ]) {
       const built = fixture();
       expect(await runCli(argv, built.dependencies)).toBe(0);
@@ -132,6 +136,24 @@ describe("agentpay CLI contract", () => {
     );
     expect(JSON.parse(built.stderr[0]!)).toMatchObject({
       error: { code: "SKILL_LOAD_FAILED", chargeState: "NOT_CHARGED" },
+    });
+  });
+
+  test("keeps publisher identity failures in the metadata-only command", async () => {
+    const built = fixture({
+      payInsight: vi.fn(async () => {
+        throw Object.assign(new Error("PUBLISHER_IDENTITY_REQUIRED"), {
+          code: "PUBLISHER_IDENTITY_REQUIRED",
+        });
+      }),
+    });
+    await runCli(["publisher", "payinsight", "--json"], built.dependencies);
+    expect(JSON.parse(built.stderr[0]!)).toMatchObject({
+      command: "publisher",
+      error: {
+        code: "PUBLISHER_IDENTITY_REQUIRED",
+        chargeState: "NOT_CHARGED",
+      },
     });
   });
 

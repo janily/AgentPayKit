@@ -53,12 +53,12 @@
 
 **Files:** Create `packages/cli/src/commands/{spend,receipts,payinsight}.ts`, `packages/observability/src/payinsight.ts`, D1 aggregation query and CLI tests.
 
-- [ ] Snapshot tests 固定 human/`--json` 输出；用户命令只读本地 SQLite，PayInsight 必须有 Publisher Cloudflare identity。
-- [ ] 测试按时间/release/status 汇总、unknown settlement、结果过期、空数据和权限拒绝。
-- [ ] 运行 tests；预期命令/queries 缺失失败。
-- [ ] 实现 `agentpay spend|receipts` 与 `agentpay publisher payinsight`；后者只返回聚合元数据与 `developerReportedCostUsd`。
-- [ ] 确认任何命令不返回输入、结果正文、Payment Snapshot 或完整 payer 数据。
-- [ ] 提交：`git commit -m "feat(cli): add spend and PayInsight queries"`。
+- [x] Snapshot tests 固定 human/`--json` 输出；用户命令只读本地 SQLite，PayInsight 必须有 Publisher Cloudflare identity。
+- [x] 测试按时间/release/status 汇总、unknown settlement、结果过期、空数据和权限拒绝。
+- [x] 运行 tests；预期命令/queries 缺失失败。
+- [x] 实现 `agentpay spend|receipts` 与 `agentpay publisher payinsight`；后者只返回聚合元数据与 `developerReportedCostUsd`。
+- [x] 确认任何命令不返回输入、结果正文、Payment Snapshot 或完整 payer 数据。
+- [x] 提交：`git commit -m "feat(cli): add spend and PayInsight queries"`。
 
 ### Task 5: Package and test the official example
 

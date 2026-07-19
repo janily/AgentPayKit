@@ -21,6 +21,7 @@
     "@agentpaykit/browser-bridge": "workspace:^",
     "@agentpaykit/client": "workspace:^",
     "@agentpaykit/installer": "workspace:^",
+    "@agentpaykit/observability": "workspace:^",
     "@agentpaykit/publisher": "workspace:^",
     "@agentpaykit/protocol": "workspace:^",
     "viem": "2.55.2"

@@ -224,6 +224,23 @@ export async function createDefaultDependencies(): Promise<CliDependencies> {
     client,
     loadSkill,
     spend: async () => reservations.summary(new Date()),
+    receipts: async () =>
+      budgetStore
+        .forDay(new Date().toISOString().slice(0, 10))
+        .map((record) => ({
+          invocationId: record.invocationId,
+          amount: record.amount,
+          state: record.state,
+          ...(record.receiptDigest
+            ? { receiptDigest: record.receiptDigest }
+            : {}),
+          updatedAt: record.updatedAt,
+        })),
+    payInsight: async () => {
+      throw Object.assign(new Error("PUBLISHER_IDENTITY_REQUIRED"), {
+        code: "PUBLISHER_IDENTITY_REQUIRED",
+      });
+    },
     writeStdout: (line) => process.stdout.write(`${line}\n`),
     writeStderr: (line) => process.stderr.write(`${line}\n`),
     signals: {

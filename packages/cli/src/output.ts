@@ -9,6 +9,8 @@ export type CliCommand =
   | "install"
   | "doctor"
   | "release"
+  | "receipts"
+  | "publisher"
   | "unknown";
 
 export interface CliFailure {
@@ -94,7 +96,10 @@ export function errorOutput(command: CliCommand, error: unknown) {
   const failure: CliFailure = {
     code,
     message: errorMessage(error, code),
-    chargeState: command === "spend" ? "NOT_CHARGED" : chargeStateFor(error),
+    chargeState:
+      command === "spend" || command === "receipts" || command === "publisher"
+        ? "NOT_CHARGED"
+        : chargeStateFor(error),
     ...(id ? { invocationId: id, resumeCommand: `agentpay resume ${id}` } : {}),
   };
   return {
