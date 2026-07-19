@@ -8,6 +8,18 @@
   },
   "processors": ["api.example.invalid"],
   "maximumExecutionMs": 30000,
+  "files": [
+    "package.json",
+    "pnpm-lock.yaml",
+    "tsconfig.json",
+    "wrangler.testnet.jsonc",
+    "wrangler.mainnet.jsonc",
+    "schemas/input.json",
+    "schemas/result.json",
+    "src/handler.ts",
+    "src/success-policy.ts",
+    "test/handler.test.ts"
+  ],
   "inputSchema": "schemas/input.json",
   "resultSchema": "schemas/result.json"
 }

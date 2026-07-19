@@ -42,11 +42,11 @@
 
 **Files:** Create `packages/publisher/src/{package-builder,archive}.ts`, `packages/protocol/schemas/package.json`, reproducibility/security tests.
 
-- [ ] 测试两次构建字节与 Package Digest 完全相同；symlink、absolute path、`..`、秘密文件和未声明文件失败。
-- [ ] 运行测试；预期 package builder 缺失失败。
-- [ ] 归一化文件顺序、mode、mtime、uid/gid；Package 包含薄 Agent adapter、Release、schemas、manifest 与安装声明。
-- [ ] 增加秘密扫描，拒绝 `.env`、key/seed 常见模式、Cloudflare/CDP credentials。
-- [ ] 提交：`git commit -m "feat(publisher): build deterministic skill packages"`。
+- [x] 测试两次构建字节与 Package Digest 完全相同；symlink、absolute path、`..`、秘密文件和未声明文件失败。
+- [x] 运行测试；预期 package builder 缺失失败。
+- [x] 归一化文件顺序、mode、mtime、uid/gid；Package 包含薄 Agent adapter、Release、schemas、manifest 与安装声明。
+- [x] 增加秘密扫描，拒绝 `.env`、key/seed 常见模式、Cloudflare/CDP credentials。
+- [x] 提交：`git commit -m "feat(publisher): build deterministic skill packages"`。
 
 ### Task 4: Install shared Client and both Agent entries atomically
 
