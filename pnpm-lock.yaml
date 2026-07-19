@@ -214,10 +214,17 @@ importers:
         version: 2.1.9(@types/node@24.13.3)
 
   packages/runtime:
+    dependencies:
+      '@agentpaykit/protocol':
+        specifier: workspace:^
+        version: link:../protocol
     devDependencies:
       '@agentpaykit/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
+      miniflare:
+        specifier: 4.20260714.0
+        version: 4.20260714.0
       typescript:
         specifier: ^5.6.3
         version: 5.9.3

@@ -15,7 +15,11 @@
   },
   "devDependencies": {
     "@agentpaykit/tsconfig": "workspace:*",
+    "miniflare": "4.20260714.0",
     "typescript": "^5.6.3",
     "vitest": "^2.1.9"
+  },
+  "dependencies": {
+    "@agentpaykit/protocol": "workspace:^"
   }
 }
