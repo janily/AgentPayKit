@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["report", "citations", "telemetry"],
+  "properties": {
+    "report": { "type": "string" },
+    "citations": {
+      "type": "array",
+      "items": { "type": "string", "format": "uri" }
+    },
+    "telemetry": { "type": "object" }
+  }
+}

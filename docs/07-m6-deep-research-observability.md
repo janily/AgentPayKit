@@ -21,12 +21,12 @@
 
 **Files:** Create `examples/paid-deep-research-lite/src/{types,search-adapter,model-adapter,budget,handler}.ts`, schemas and tests.
 
-- [ ] Fake providers 测试 query/input schema、processor allowlist、5/5/3000/5min 上限与最多一次安全重试。
-- [ ] 测试新增未声明 processor、请求正文超限、成本上限、timeout 均返回可分类的 Handler error。
-- [ ] 运行示例测试；预期模块缺失失败。
-- [ ] 实现 provider-neutral interfaces；完整输入仅传给 Release 声明的处理方，不记录 response body。
-- [ ] 以 `developerReportedCostUsd` 记录 Publisher 申报成本，不使用“审计成本”措辞。
-- [ ] 提交：`git commit -m "feat(example): implement bounded deep research handler"`。
+- [x] Fake providers 测试 query/input schema、processor allowlist、5/5/3000/5min 上限与最多一次安全重试。
+- [x] 测试新增未声明 processor、请求正文超限、成本上限、timeout 均返回可分类的 Handler error。
+- [x] 运行示例测试；预期模块缺失失败。
+- [x] 实现 provider-neutral interfaces；完整输入仅传给 Release 声明的处理方，不记录 response body。
+- [x] 以 `developerReportedCostUsd` 记录 Publisher 申报成本，不使用“审计成本”措辞。
+- [x] 提交：`git commit -m "feat(example): implement bounded deep research handler"`。
 
 ### Task 2: Implement and bind the Success Policy
 
