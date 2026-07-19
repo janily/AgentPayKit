@@ -21,10 +21,10 @@
 
 **Files:** Create `packages/client/src/{client,release-verifier,http,status-poller}.ts`, tests; modify `src/index.ts`.
 
-- [ ] 使用 fake runtime 写测试：先验证 Package/Release/Runtime identity，再本地 digest，再 quote；失败时 HTTP 调用数符合阶段边界。
-- [ ] 测试中断后 `resume(invocationId)` 只查询状态/结果，不重新 quote、签名、执行或收费。
-- [ ] 运行包级测试；预期 `AgentPayClient` 缺失失败。
-- [ ] 实现固定接口：
+- [x] 使用 fake runtime 写测试：先验证 Package/Release/Runtime identity，再本地 digest，再 quote；失败时 HTTP 调用数符合阶段边界。
+- [x] 测试中断后 `resume(invocationId)` 只查询状态/结果，不重新 quote、签名、执行或收费。
+- [x] 运行包级测试；预期 `AgentPayClient` 缺失失败。
+- [x] 实现固定接口：
 
 ```ts
 interface AgentPayClient {
@@ -34,8 +34,8 @@ interface AgentPayClient {
 }
 ```
 
-- [ ] 对每个 runtime response 验签；退避轮询有最大时长并返回可恢复 handle。
-- [ ] 提交：`git commit -m "feat(client): add shared invocation and resume flow"`。
+- [x] 对每个 runtime response 验签；退避轮询有最大时长并返回可恢复 handle。
+- [x] 提交：`git commit -m "feat(client): add shared invocation and resume flow"`。
 
 ### Task 2: Add local SQLite budget and reservations
 

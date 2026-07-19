@@ -135,6 +135,10 @@ importers:
         version: 2.1.9(@types/node@24.13.3)
 
   packages/client:
+    dependencies:
+      '@agentpaykit/protocol':
+        specifier: workspace:^
+        version: link:../protocol
     devDependencies:
       '@agentpaykit/tsconfig':
         specifier: workspace:*
