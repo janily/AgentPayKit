@@ -5,6 +5,8 @@ export interface PaymentModalProps {
   payee: string;
   network: string;
   inputDigest: string;
+  releaseId: string;
+  dataDisclosure: string;
   onApprove: () => void | Promise<void>;
   onReject: () => void;
 }
@@ -14,11 +16,30 @@ function truncate(value: string, prefix = 10, suffix = 8): string {
   return `${value.slice(0, prefix)}…${value.slice(-suffix)}`;
 }
 
+function approvalError(error: unknown): string {
+  const code =
+    typeof error === "object" && error !== null && "code" in error
+      ? error.code
+      : undefined;
+  if (code === "WRONG_WALLET_NETWORK") {
+    return "MetaMask is connected to the wrong network. Switch networks and try again.";
+  }
+  if (code === "INSUFFICIENT_USDC_BALANCE") {
+    return "This wallet does not have enough USDC for the invocation.";
+  }
+  if (code === "WALLET_REJECTED") {
+    return "The wallet signature was rejected. No payment was submitted.";
+  }
+  return "Wallet approval did not complete. No payment was submitted.";
+}
+
 export function PaymentModal({
   amount,
   payee,
   network,
   inputDigest,
+  releaseId,
+  dataDisclosure,
   onApprove,
   onReject,
 }: PaymentModalProps) {
@@ -30,8 +51,8 @@ export function PaymentModal({
     setIsApproving(true);
     try {
       await onApprove();
-    } catch {
-      setError("Wallet approval did not complete. No payment was submitted.");
+    } catch (failure) {
+      setError(approvalError(failure));
       setIsApproving(false);
     }
   }
@@ -85,6 +106,19 @@ export function PaymentModal({
           >
             {truncate(inputDigest)}
           </dd>
+        </div>
+        <div className="grid grid-cols-[7.5rem_1fr] gap-4 py-4">
+          <dt className="text-sm text-zinc-500">Release</dt>
+          <dd
+            className="break-all font-mono text-sm text-zinc-800"
+            title={releaseId}
+          >
+            {truncate(releaseId)}
+          </dd>
+        </div>
+        <div className="grid grid-cols-[7.5rem_1fr] gap-4 py-4">
+          <dt className="text-sm text-zinc-500">Data use</dt>
+          <dd className="text-sm leading-6 text-zinc-700">{dataDisclosure}</dd>
         </div>
       </dl>
 

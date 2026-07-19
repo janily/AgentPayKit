@@ -5,6 +5,8 @@ export interface BridgeRequest {
   payee: string;
   network: string;
   inputDigest: string;
+  releaseId: string;
+  dataDisclosure: string;
 }
 
 export interface AppProps {
@@ -19,6 +21,8 @@ const previewRequest: BridgeRequest = {
   network: "Base Sepolia · eip155:84532",
   inputDigest:
     "sha256:7a1bb14e7287978e8f5d105f7f456c9efcd1356b0fdc69db986e83a88dd6f4c2",
+  releaseId: `rel_${"8f2a1c".repeat(10)}8f2a`,
+  dataDisclosure: "Input is sent only to the selected skill runtime.",
 };
 
 export default function App({

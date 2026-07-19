@@ -52,13 +52,13 @@ interface AgentPayClient {
 
 **Files:** Create `packages/browser-bridge/src/server/{session-store,loopback-server,csp}.ts`, `src/wallet/x402-signer.ts`; modify payment components/App; add Playwright tests.
 
-- [ ] 测试仅接受 loopback Host、POST body token、正确 Origin；拒绝重放、超时、CSRF、非本机会话和 URL token。
-- [ ] UI 测试断言只展示 digest、价格、payee、network、release、数据声明；DOM/localStorage/history 无完整输入。
-- [ ] 运行测试；预期 server/session 缺失失败。
-- [ ] 实现随机端口、256-bit token、5 分钟 TTL、一次性 consume、完成/拒绝/关闭后销毁；CSP 只允许本地静态资源和 MetaMask provider。
-- [ ] 使用官方 x402 client/evm 结构创建 Payment Payload；禁止自行拼 EIP-712 签名。
-- [ ] Playwright + mock EIP-1193 验证同意、拒绝、错链、余额不足、窗口关闭。
-- [ ] 提交：`git commit -m "feat(bridge): add secure per-invocation MetaMask approval"`。
+- [x] 测试仅接受 loopback Host、POST body token、正确 Origin；拒绝重放、超时、CSRF、非本机会话和 URL token。
+- [x] UI 测试断言只展示 digest、价格、payee、network、release、数据声明；DOM/localStorage/history 无完整输入。
+- [x] 运行测试；预期 server/session 缺失失败。
+- [x] 实现随机端口、256-bit token、5 分钟 TTL、一次性 consume、完成/拒绝/关闭后销毁；CSP 只允许本地静态资源和 MetaMask provider。
+- [x] 使用官方 x402 client/evm 结构创建 Payment Payload；禁止自行拼 EIP-712 签名。
+- [x] Playwright + mock EIP-1193 验证同意、拒绝、错链、余额不足、窗口关闭。
+- [x] 提交：`git commit -m "feat(bridge): add secure per-invocation MetaMask approval"`。
 
 ### Task 4: Build user CLI and charge-aware errors
 

@@ -7,6 +7,9 @@ const packageRoot = fileURLToPath(new URL(".", import.meta.url));
 
 export default defineConfig({
   plugins: [react()],
+  test: {
+    exclude: ["e2e/**", "**/node_modules/**", "**/dist/**", "**/dist-lib/**"],
+  },
   resolve: {
     alias: {
       "@": path.resolve(packageRoot, "src"),
@@ -20,5 +23,15 @@ export default defineConfig({
   build: {
     outDir: "dist",
     sourcemap: true,
+    rollupOptions: {
+      output: {
+        inlineDynamicImports: true,
+        entryFileNames: "assets/bridge.js",
+        assetFileNames: (asset) =>
+          asset.name?.endsWith(".css")
+            ? "assets/bridge.css"
+            : "assets/[name][extname]",
+      },
+    },
   },
 });
