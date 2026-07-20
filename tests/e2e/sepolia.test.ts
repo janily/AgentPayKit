@@ -213,10 +213,47 @@ describe.skipIf(!enabled)("Base Sepolia release gate", () => {
           ...actual,
           finalStatus: status.status,
           chargeState: status.chargeState,
+          executionCount: 1,
         };
+        const resultResponse = await fetch(
+          new URL(
+            `/v1/invocations/${result.invocationId}/result`,
+            env.SEPOLIA_RUNTIME_URL,
+          ),
+        );
+        const expectedVisible = scenarios[result.name].expected.resultVisible;
+        expect(resultResponse.ok).toBe(expectedVisible);
+        if (resultResponse.ok) {
+          const signedResult = (await resultResponse.json()) as {
+            payload: {
+              invocationId?: string;
+              status?: string;
+              resultDigest?: string;
+            };
+            signature: CanonicalSignature;
+          };
+          expect(signedResult.payload).toMatchObject({
+            invocationId: result.invocationId,
+            status: "RESULT_AVAILABLE",
+          });
+          expect(signedResult.payload.resultDigest).toMatch(
+            /^sha256:[0-9a-f]{64}$/,
+          );
+          expect(signedResult.signature.keyId).toBe(
+            runtimeIdentity.runtimeKeyId,
+          );
+          expect(
+            await verifyCanonicalSignature(
+              "runtime-result-v1",
+              signedResult.payload,
+              signedResult.signature,
+              runtimePublicKey,
+            ),
+          ).toBe(true);
+        }
+        actual = { ...actual, resultVisible: resultResponse.ok };
       }
-      expect(actual).toEqual(scenarios[result.name].expected);
-      if (result.actual.transferCount === 1) {
+      if (scenarios[result.name].expected.transferCount === 1) {
         expect(result.transactionHash).toMatch(/^0x[0-9a-fA-F]{64}$/);
         expect(transactions.has(result.transactionHash!.toLowerCase())).toBe(
           false,
@@ -282,6 +319,15 @@ describe.skipIf(!enabled)("Base Sepolia release gate", () => {
       } else {
         expect(result.transactionHash).toBeUndefined();
       }
+      if (result.mode === "chain") {
+        const transferred = verifiedReceiptDigest ? 1 : 0;
+        actual = {
+          ...actual,
+          settleCount: transferred,
+          transferCount: transferred,
+        };
+      }
+      expect(actual).toEqual(scenarios[result.name].expected);
       verifiedEvidence.push({
         name: result.name,
         mode: result.mode,
@@ -296,7 +342,7 @@ describe.skipIf(!enabled)("Base Sepolia release gate", () => {
     }
 
     const chargedCount = evidence.filter(
-      ({ actual }) => actual.transferCount === 1,
+      ({ name }) => scenarios[name].expected.transferCount === 1,
     ).length;
     const walletAfter = await balance(env, env.SEPOLIA_WALLET_ADDRESS);
     const payeeAfter = await balance(env, env.SEPOLIA_PAYEE_ADDRESS);

@@ -150,7 +150,8 @@ const trackedEvidence = spawnSync(
 if (trackedEvidence.status !== 0) fail("SEPOLIA_EVIDENCE_NOT_TRACKED");
 if (
   !sepolia ||
-  sepolia.commit !== env.AGENTPAY_PREFLIGHT_COMMIT ||
+  !/^[0-9a-f]{40}$/.test(sepolia.commit ?? "") ||
+  sepolia.network !== "eip155:84532" ||
   !/^rel_[0-9a-f]{64}$/.test(sepolia.releaseId ?? "") ||
   !Number.isFinite(Date.parse(sepolia.capturedAt ?? "")) ||
   sepolia.passed !== 12 ||
@@ -159,6 +160,44 @@ if (
 ) {
   fail("SEPOLIA_GATE_NOT_PASSED");
 }
+const testedCommitIsAncestor = spawnSync(
+  "git",
+  [
+    "merge-base",
+    "--is-ancestor",
+    sepolia.commit,
+    env.AGENTPAY_PREFLIGHT_COMMIT,
+  ],
+  { encoding: "utf8" },
+);
+if (testedCommitIsAncestor.status !== 0) {
+  fail("SEPOLIA_TESTED_COMMIT_NOT_ANCESTOR");
+}
+const evidenceOnlyPaths = new Set([
+  "artifacts/e2e-sepolia.json",
+  "artifacts/release-evidence.json",
+  "docs/acceptance/m7-sepolia.md",
+]);
+const changesAfterTest = spawnSync(
+  "git",
+  [
+    "diff",
+    "--name-only",
+    `${sepolia.commit}..${env.AGENTPAY_PREFLIGHT_COMMIT}`,
+  ],
+  { encoding: "utf8" },
+);
+const changedPaths = changesAfterTest.stdout.trim().split("\n").filter(Boolean);
+if (
+  changesAfterTest.status !== 0 ||
+  !changedPaths.includes("artifacts/e2e-sepolia.json") ||
+  changedPaths.some((path) => !evidenceOnlyPaths.has(path))
+) {
+  fail("NON_EVIDENCE_CHANGE_AFTER_SEPOLIA_GATE");
+}
+const invocationIds = new Set();
+const transactionHashes = new Set();
+const receiptDigests = new Set();
 for (const scenario of sepolia.scenarios) {
   const expected = expectedOutcome(expectedScenarios[scenario.name]);
   if (
@@ -175,6 +214,12 @@ for (const scenario of sepolia.scenarios) {
   ) {
     fail("SEPOLIA_INVOCATION_EVIDENCE_INVALID");
   }
+  if (scenario.mode === "chain") {
+    if (invocationIds.has(scenario.invocationId)) {
+      fail("SEPOLIA_INVOCATION_EVIDENCE_DUPLICATE");
+    }
+    invocationIds.add(scenario.invocationId);
+  }
   if (expected.transferCount === 1) {
     if (
       !/^0x[0-9a-fA-F]{64}$/.test(scenario.transactionHash ?? "") ||
@@ -183,6 +228,15 @@ for (const scenario of sepolia.scenarios) {
     ) {
       fail("SEPOLIA_PAYMENT_EVIDENCE_INVALID");
     }
+    const transactionHash = scenario.transactionHash.toLowerCase();
+    if (
+      transactionHashes.has(transactionHash) ||
+      receiptDigests.has(scenario.receiptDigest)
+    ) {
+      fail("SEPOLIA_PAYMENT_EVIDENCE_DUPLICATE");
+    }
+    transactionHashes.add(transactionHash);
+    receiptDigests.add(scenario.receiptDigest);
   } else if (scenario.transactionHash || scenario.receiptDigest) {
     fail("SEPOLIA_ZERO_CHARGE_EVIDENCE_INVALID");
   }
