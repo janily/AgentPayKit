@@ -11,6 +11,7 @@ import { resumeCommand } from "./commands/resume";
 import type { SpendSummary } from "./commands/spend";
 import { spendCommand } from "./commands/spend";
 import { statusCommand } from "./commands/status";
+import { uninstallCommand } from "./commands/uninstall";
 import {
   errorOutput,
   humanError,
@@ -44,6 +45,7 @@ function commandName(value: string | undefined): CliCommand {
     value === "spend" ||
     value === "create" ||
     value === "install" ||
+    value === "uninstall" ||
     value === "doctor" ||
     value === "release" ||
     value === "receipts" ||
@@ -67,6 +69,8 @@ function humanSuccess(command: CliCommand, data: unknown): string {
       return `Created paid skill at ${String(value.path)}`;
     case "install":
       return `Installed skill at ${String(value.skillRoot)} for Codex and Claude Code`;
+    case "uninstall":
+      return `Removed ${String(value.name)} ${String(value.releaseId)}; shared client preserved`;
     case "doctor":
       return `Installation healthy: ${String(value.name)} ${String(value.releaseId)}`;
     case "release":
@@ -106,30 +110,35 @@ export async function runCli(
         ? await createCommand(args)
         : command === "install"
           ? await installCommand(args)
-          : command === "doctor"
-            ? await doctorCommand(args)
-            : command === "release"
-              ? await releaseCommand(args)
-              : command === "receipts"
-                ? await receiptsCommand(dependencies.receipts)
-                : command === "publisher"
-                  ? args[0] === "payinsight"
-                    ? await payInsightCommand(
-                        args.slice(1),
-                        dependencies.payInsight,
-                      )
-                    : Promise.reject(
-                        Object.assign(new Error("PUBLISHER_COMMAND_REQUIRED"), {
-                          code: "PUBLISHER_COMMAND_REQUIRED",
-                        }),
-                      )
-                  : command === "invoke"
-                    ? await invokeCommand(args, dependencies)
-                    : command === "status"
-                      ? await statusCommand(args, dependencies.client)
-                      : command === "resume"
-                        ? await resumeCommand(args, dependencies.client)
-                        : await spendCommand(dependencies.spend);
+          : command === "uninstall"
+            ? await uninstallCommand(args)
+            : command === "doctor"
+              ? await doctorCommand(args)
+              : command === "release"
+                ? await releaseCommand(args)
+                : command === "receipts"
+                  ? await receiptsCommand(dependencies.receipts)
+                  : command === "publisher"
+                    ? args[0] === "payinsight"
+                      ? await payInsightCommand(
+                          args.slice(1),
+                          dependencies.payInsight,
+                        )
+                      : Promise.reject(
+                          Object.assign(
+                            new Error("PUBLISHER_COMMAND_REQUIRED"),
+                            {
+                              code: "PUBLISHER_COMMAND_REQUIRED",
+                            },
+                          ),
+                        )
+                    : command === "invoke"
+                      ? await invokeCommand(args, dependencies)
+                      : command === "status"
+                        ? await statusCommand(args, dependencies.client)
+                        : command === "resume"
+                          ? await resumeCommand(args, dependencies.client)
+                          : await spendCommand(dependencies.spend);
     if (interrupted && command === "invoke") {
       const invocation = data as Record<string, unknown>;
       throw Object.assign(new Error("INTERRUPTED"), {

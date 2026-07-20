@@ -12,6 +12,7 @@ export * from "./commands/release";
 export * from "./commands/resume";
 export * from "./commands/spend";
 export * from "./commands/status";
+export * from "./commands/uninstall";
 export * from "./main";
 export * from "./output";
 

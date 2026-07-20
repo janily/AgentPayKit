@@ -16,6 +16,10 @@ import {
   type InstalledSkill,
   type VerifiedInstalledSkill,
 } from "@agentpaykit/client";
+import {
+  readDeterministicTar,
+  type SignedRelease,
+} from "@agentpaykit/publisher";
 
 import type { CliDependencies } from "./main";
 
@@ -95,18 +99,29 @@ class FileBindings {
 
 interface SkillDescriptor {
   packageFile: string;
-  release: InstalledSkill["release"];
-  publisher: { keyId: string; publicKey: string };
+  release: SignedRelease;
 }
 
-async function loadSkill(path: string): Promise<InstalledSkill> {
-  const descriptor = JSON.parse(
-    await readFile(path, "utf8"),
-  ) as SkillDescriptor;
+export async function loadSkill(path: string): Promise<InstalledSkill> {
+  const bytes = await readFile(path);
+  try {
+    const releaseEntry = readDeterministicTar(bytes).find(
+      ({ path: entryPath }) => entryPath === "release.json",
+    );
+    if (releaseEntry) {
+      return {
+        packageBytes: bytes,
+        release: JSON.parse(
+          new TextDecoder().decode(releaseEntry.bytes),
+        ) as SignedRelease,
+      };
+    }
+  } catch {
+    // A JSON sidecar descriptor remains supported for compatibility.
+  }
+  const descriptor = JSON.parse(bytes.toString("utf8")) as SkillDescriptor;
   if (
     typeof descriptor.packageFile !== "string" ||
-    typeof descriptor.publisher?.keyId !== "string" ||
-    typeof descriptor.publisher?.publicKey !== "string" ||
     typeof descriptor.release !== "object" ||
     descriptor.release === null
   ) {
@@ -120,10 +135,6 @@ async function loadSkill(path: string): Promise<InstalledSkill> {
   return {
     packageBytes: await readFile(packagePath),
     release: descriptor.release,
-    publisher: {
-      keyId: descriptor.publisher.keyId,
-      publicKey: decodeBase64Url(descriptor.publisher.publicKey),
-    },
   };
 }
 

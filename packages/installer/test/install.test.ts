@@ -106,6 +106,9 @@ describe("atomic dual-agent installer", () => {
     expect((await lstat(first.codexEntry)).isSymbolicLink()).toBe(true);
     expect(await readlink(first.codexEntry)).toBe(first.currentEntry);
     expect(await readlink(first.claudeEntry)).toBe(first.currentEntry);
+    expect(await readFile(first.codexEntry, "utf8")).toContain(
+      `--skill ${first.packageFile}`,
+    );
 
     await uninstallSkill({
       home,

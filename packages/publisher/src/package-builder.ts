@@ -101,13 +101,13 @@ export async function prepareSkillPackage(
     {
       path: "adapters/codex.md",
       bytes: new TextEncoder().encode(
-        "Run `agentpay invoke --skill ./installed-skill.json --input <json>`.\n",
+        "Run `agentpay invoke --skill ./package.apkg --input '<json>'`.\n",
       ),
     },
     {
       path: "adapters/claude-code.md",
       bytes: new TextEncoder().encode(
-        "Run `agentpay invoke --skill ./installed-skill.json --input <json>`.\n",
+        "Run `agentpay invoke --skill ./package.apkg --input '<json>'`.\n",
       ),
     },
   );

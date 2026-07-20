@@ -1,65 +1,88 @@
-import { packageDigest, signCanonical } from "@agentpaykit/protocol";
-import { describe, expect, test } from "vitest";
+import { createPrivateKey, createPublicKey } from "node:crypto";
+import { mkdtemp, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import {
-  StrictReleaseVerifier,
-  type InstalledSkill,
-} from "../src/release-verifier";
+  buildRelease,
+  buildSkillPackage,
+  prepareSkillPackage,
+  signRelease,
+  signRuntimeDelegation,
+} from "@agentpaykit/publisher";
+import { describe, expect, test } from "vitest";
+import { privateKeyToAccount } from "viem/accounts";
 
-const privateKeySeed =
-  "9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60";
-const publicKey =
-  "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a";
+import { StrictReleaseVerifier } from "../src/release-verifier";
 
-function hex(value: string): Uint8Array {
-  return Uint8Array.from(value.match(/../g) ?? [], (byte) =>
-    Number.parseInt(byte, 16),
+const seed = Uint8Array.from({ length: 32 }, (_, index) => 32 - index);
+const pkcs8Prefix = Buffer.from("302e020100300506032b657004220420", "hex");
+const runtimePublicKey = createPublicKey(
+  createPrivateKey({
+    key: Buffer.concat([pkcs8Prefix, seed]),
+    format: "der",
+    type: "pkcs8",
+  }),
+)
+  .export({ format: "der", type: "spki" })
+  .subarray(-32)
+  .toString("base64url");
+const testWallet = privateKeyToAccount(`0x${"1234".repeat(16)}`);
+
+async function fixture() {
+  const project = await mkdtemp(join(tmpdir(), "agentpay-client-release-"));
+  await writeFile(
+    join(project, "agentpay.json"),
+    JSON.stringify({
+      schemaVersion: "1",
+      name: "client-fixture",
+      files: ["handler.ts"],
+    }),
   );
-}
-
-function base64Url(bytes: Uint8Array): string {
-  return btoa(String.fromCharCode(...bytes))
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
-}
-
-async function fixture(): Promise<InstalledSkill> {
-  const packageBytes = new TextEncoder().encode("immutable skill package");
-  const payload = {
-    schemaVersion: "1" as const,
-    releaseId: `rel_${"a".repeat(64)}`,
-    packageDigest: await packageDigest(packageBytes),
-    environment: "testnet" as const,
-    runtimeUrl: "https://runtime.agentpay.test",
-    runtimeKeyId: "runtime-2026-07",
-    runtimePublicKey: base64Url(hex(publicKey)),
-  };
+  await writeFile(join(project, "handler.ts"), "export default {}\n");
+  const prepared = await prepareSkillPackage(project);
+  const delegation = await signRuntimeDelegation(
+    {
+      schemaVersion: "1",
+      environment: "testnet",
+      network: "eip155:84532",
+      runtimeUrl: "https://runtime.agentpay.test",
+      runtimeKeyId: "runtime-2026-07",
+      runtimePublicKey,
+      issuedAt: "2026-07-19T00:00:00.000Z",
+      expiresAt: "2027-09-19T00:00:00.000Z",
+    },
+    { keyId: "runtime-2026-07", privateKeySeed: seed },
+  );
+  const payload = await buildRelease({
+    schemaVersion: "1",
+    packageDigest: prepared.digest,
+    environment: "testnet",
+    network: "eip155:84532",
+    publisher: "0x1111111111111111111111111111111111111111",
+    payee: testWallet.address,
+    amount: "10000",
+    asset: "0x2222222222222222222222222222222222222222",
+    runtimeDelegation: delegation,
+    issuedAt: "2026-07-19T00:00:00.000Z",
+    expiresAt: "2027-09-19T00:00:00.000Z",
+  });
+  const release = await signRelease(payload, testWallet);
   return {
-    packageBytes,
-    release: {
-      payload: payload as InstalledSkill["release"]["payload"],
-      signature: await signCanonical("release-v1", payload, {
-        keyId: "publisher-test-key",
-        privateKeySeed: hex(privateKeySeed),
-      }),
-    },
-    publisher: {
-      keyId: "publisher-test-key",
-      publicKey: hex(publicKey),
-    },
+    release,
+    packageBytes: (await buildSkillPackage({ root: project, release })).bytes,
   };
 }
 
 describe("StrictReleaseVerifier", () => {
-  test("binds immutable package, publisher signature and runtime identity", async () => {
+  test("verifies the published EIP-191 Release and delegated Runtime", async () => {
     const skill = await fixture();
-
     await expect(
       new StrictReleaseVerifier().verify(skill),
     ).resolves.toMatchObject({
       releaseId: skill.release.payload.releaseId,
       packageDigest: skill.release.payload.packageDigest,
+      environment: "testnet",
       runtime: {
         url: "https://runtime.agentpay.test",
         keyId: "runtime-2026-07",
@@ -69,8 +92,7 @@ describe("StrictReleaseVerifier", () => {
 
   test("rejects a one-byte package mutation", async () => {
     const skill = await fixture();
-    skill.packageBytes[0] ^= 1;
-
+    skill.packageBytes[520] ^= 1;
     await expect(
       new StrictReleaseVerifier().verify(skill),
     ).rejects.toMatchObject({

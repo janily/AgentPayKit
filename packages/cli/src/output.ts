@@ -7,6 +7,7 @@ export type CliCommand =
   | "spend"
   | "create"
   | "install"
+  | "uninstall"
   | "doctor"
   | "release"
   | "receipts"
@@ -96,10 +97,18 @@ export function errorOutput(command: CliCommand, error: unknown) {
   const failure: CliFailure = {
     code,
     message: errorMessage(error, code),
-    chargeState:
-      command === "spend" || command === "receipts" || command === "publisher"
-        ? "NOT_CHARGED"
-        : chargeStateFor(error),
+    chargeState: [
+      "create",
+      "install",
+      "uninstall",
+      "doctor",
+      "release",
+      "spend",
+      "receipts",
+      "publisher",
+    ].includes(command)
+      ? "NOT_CHARGED"
+      : chargeStateFor(error),
     ...(id ? { invocationId: id, resumeCommand: `agentpay resume ${id}` } : {}),
   };
   return {

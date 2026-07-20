@@ -124,7 +124,7 @@ export async function installSkill(input: {
       );
       if (input.failAt === "skill") throw new Error("INJECTED_WRITE_FAILURE");
     }
-    const adapter = `Use the shared AgentPayKit client at ${layout.clientBin}.\nSkill package: ${layout.packageFile}\n`;
+    const adapter = `Use the shared AgentPayKit client at ${layout.clientBin}.\nInvoke this paid skill with \`${layout.clientBin} invoke --skill ${layout.packageFile} --input '<json>'\`.\n`;
     const adapterFile = `${layout.skillRoot}/SKILL.md`;
     if (!(await exists(adapterFile)))
       await transaction.file(adapterFile, new TextEncoder().encode(adapter));
