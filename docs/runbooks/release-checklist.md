@@ -9,7 +9,7 @@ Release is fail-closed. Do not create or publish a release tag while any item is
 - [ ] `docs/acceptance/third-party-script.md` records an independent pass within 30 minutes.
 - [ ] `docs/acceptance/mvp-dod.md` has no unchecked product DoD item.
 - [x] Source, package, CLI bundle, logs and evidence contain no secret or full-input marker.
-- [ ] Independent code review and security review have no Critical or Important finding.
+- [x] Independent code review and security review have no Critical or Important finding.
 - [x] The six global verification commands pass from the candidate tree.
 - [ ] `git status --short` is empty.
 - [ ] `HEAD` is a signed commit and the proposed release tag is signed.

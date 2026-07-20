@@ -76,7 +76,7 @@
 - [x] 对 PRD DoD 逐项绑定自动测试名或脱敏 evidence 字段；无证据项保持 unchecked 并阻断 release。
 - [x] 运行最终命令：`pnpm install --frozen-lockfile && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build`。
 - [ ] 运行 `git status --short`，确认仅保留明确计划纳入的 evidence；生成不可变 release tag 候选。
-- [ ] 请求独立代码审查与安全审查，解决全部 blocking findings 后重新跑 Gate。
+- [x] 请求独立代码审查与安全审查，解决全部 blocking findings 后重新跑 Gate。
 - [ ] 提交：`git commit -m "docs: complete AgentPayKit MVP release evidence"`。
 
 ## M7 Definition of Done
