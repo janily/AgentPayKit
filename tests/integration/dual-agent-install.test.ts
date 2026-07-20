@@ -4,7 +4,9 @@ import { mkdtemp, readFile, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { promisify } from "node:util";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 
+import { LoopbackBridgeServer } from "../../packages/browser-bridge/src/index";
 import { installSkill } from "../../packages/installer/src/index";
 import { signCanonical } from "../../packages/protocol/src/index";
 import { expect, test } from "vitest";
@@ -99,6 +101,93 @@ test("one install gives both agents the same complete production client", async 
     );
   }
   expect(runtimeRequests).toBe(2);
+  const importableClient = join(home, "installed-client.mjs");
+  await writeFile(importableClient, await readFile(layout.clientBin), {
+    mode: 0o700,
+  });
+  const installedModule = (await import(
+    `${pathToFileURL(importableClient).href}?test=${Date.now()}`
+  )) as {
+    BRIDGE_ASSETS: Readonly<Record<string, string>>;
+    runCli(
+      argv: string[],
+      dependencies: Record<string, unknown>,
+    ): Promise<number>;
+  };
+  const bridge = await LoopbackBridgeServer.start({
+    staticAssets: installedModule.BRIDGE_ASSETS,
+  });
+  try {
+    const session = bridge.createSession({
+      invocationId,
+      inputDigest: `sha256:${"b".repeat(64)}`,
+      amount: "0.01",
+      payee: `0x${"2".repeat(40)}`,
+      network: "eip155:84532",
+      releaseId: built.releaseId,
+      dataDisclosure: "test-only metadata",
+      paymentRequired: "test-only",
+    });
+    const javaScript = await fetch(new URL("/assets/bridge.js", session.url));
+    const css = await fetch(new URL("/assets/bridge.css", session.url));
+    expect(await javaScript.text()).toContain("AgentPayKit Browser Bridge");
+    expect((await css.text()).length).toBeGreaterThan(1_000);
+  } finally {
+    await bridge.close();
+  }
+
+  let invocationCount = 0;
+  const output: string[] = [];
+  const dependencies = {
+    platform: "darwin",
+    loadSkill: async (path: string) => {
+      expect(path).toBe(layout.packageFile);
+      return { packageBytes: await readFile(path), release: {} };
+    },
+    client: {
+      async invoke(skill: { packageBytes: Uint8Array }) {
+        expect(Buffer.from(skill.packageBytes)).toEqual(
+          Buffer.from(built.bytes),
+        );
+        invocationCount += 1;
+        return { invocationId, status: { payload: status, signature } };
+      },
+      async resume(id: string) {
+        expect(id).toBe(invocationId);
+        return { invocationId, result: { answer: "resumed" } };
+      },
+    },
+    spend: async () => ({}),
+    receipts: async () => [],
+    payInsight: async () => ({}),
+    writeStdout: (line: string) => output.push(line),
+    writeStderr: (line: string) => output.push(line),
+  };
+  for (const adapter of [layout.codexEntry, layout.claudeEntry]) {
+    expect(await readFile(adapter, "utf8")).toContain(layout.packageFile);
+    expect(
+      await installedModule.runCli(
+        [
+          "invoke",
+          "--skill",
+          layout.packageFile,
+          "--input",
+          '{"query":"bounded research"}',
+          "--json",
+        ],
+        dependencies,
+      ),
+    ).toBe(0);
+  }
+  expect(invocationCount).toBe(2);
+  expect(
+    await installedModule.runCli(
+      ["resume", invocationId, "--json"],
+      dependencies,
+    ),
+  ).toBe(0);
+  expect(output.map((line) => JSON.parse(line).ok)).toEqual([true, true, true]);
+
   const spend = await execute(layout.clientBin, ["spend", "--json"], {
     env: { ...process.env, AGENTPAYKIT_HOME: home },
   });

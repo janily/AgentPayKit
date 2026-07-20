@@ -1,7 +1,7 @@
 export const credentialPatterns = [
   new RegExp("BEGIN [A-Z ]*PRIVATE KEY", "i"),
   new RegExp(
-    "(?:CLOUDFLARE_API_TOKEN|CDP_API_SECRET|SEED_PHRASE|MNEMONIC)\\s*[:=]\\s*[\\\"'][^\\\"']+",
+    "(?:CLOUDFLARE_API_TOKEN|CDP_API_KEY_SECRET|CDP_API_SECRET|SEED_PHRASE|MNEMONIC)\\s*[:=]\\s*[\\\"'][^\\\"']+",
     "i",
   ),
   new RegExp("(?:sk|rk|pk)_(?:live|prod)_[A-Za-z0-9]{16,}", "i"),

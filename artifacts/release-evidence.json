@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1",
   "releaseStatus": "not_ready",
-  "baseCommit": "00cf4ba4994cdaba5a1888c4a2721d7ad47dbffa",
+  "candidateCommit": "b4105938d6b045434d45450836379b69ed88895d",
   "network": "eip155:8453",
   "priceAtomic": "10000",
   "automated": {

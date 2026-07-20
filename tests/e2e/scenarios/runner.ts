@@ -9,6 +9,7 @@ import {
   InvocationService,
   ReconciliationService,
   RecoveryService,
+  TimedHandlerRunner,
   type InvocationRecord,
   type TransitionInvocation,
 } from "../../../packages/runtime/src/index";
@@ -315,21 +316,32 @@ async function queuedScenario(
     receipts,
     now: () => new Date("2026-07-19T00:04:00.000Z"),
   });
+  const timedHandler = new TimedHandlerRunner(async (_input, signal) => {
+    executionCount += 1;
+    return new Promise((_resolve, reject) => {
+      signal.addEventListener("abort", () => reject(new Error("aborted")));
+    });
+  });
   const consumer = new InvocationQueueConsumer({
     repository,
     releases: {
       async get() {
-        return { id: record.releaseId, maximumExecutionMs: 300_000 };
+        return {
+          id: record.releaseId,
+          maximumExecutionMs: mode === "handler-failed" ? 1 : 300_000,
+        };
       },
     },
     vault,
-    handler: {
-      async run() {
-        executionCount += 1;
-        if (mode === "handler-failed") throw new Error("HANDLER_TIMEOUT");
-        return { report: "complete" };
-      },
-    },
+    handler:
+      mode === "handler-failed"
+        ? timedHandler
+        : {
+            async run() {
+              executionCount += 1;
+              return { report: "complete" };
+            },
+          },
     policy: {
       async evaluate() {
         return mode === "policy-failed"
@@ -484,6 +496,8 @@ async function rejectedSubmission(
     now: () => new Date("2026-07-19T00:01:00.000Z"),
     traceId: () => "trc_00000000000000000000000001",
   });
+  const expectedCode =
+    mode === "quote-expired" ? "QUOTE_EXPIRED" : "INPUT_DIGEST_MISMATCH";
   await service
     .accept({
       invocationId: FIXTURE_QUOTE.payload.invocationId,
@@ -497,12 +511,18 @@ async function rejectedSubmission(
       method: "POST",
       url: "https://runtime.test/v1/invocations",
     })
-    .then(
-      () => {
-        throw new Error("REJECTED_SUBMISSION_WAS_ACCEPTED");
-      },
-      () => undefined,
-    );
+    .then(() => {
+      throw new Error("REJECTED_SUBMISSION_WAS_ACCEPTED");
+    })
+    .catch((error: unknown) => {
+      if (
+        !(error instanceof Error) ||
+        !("code" in error) ||
+        error.code !== expectedCode
+      ) {
+        throw error;
+      }
+    });
   if (verifyCount !== 0) throw new Error("REJECTED_SUBMISSION_WAS_VERIFIED");
   return unpaid("QUOTED");
 }
@@ -529,7 +549,20 @@ export async function runScenario(
       },
       allowedProcessors: ["search", "model"],
     });
-    await handler.execute({ query: "" }).catch(() => undefined);
+    await handler.execute({ query: "" }).then(
+      () => {
+        throw new Error("INVALID_RESEARCH_INPUT_WAS_ACCEPTED");
+      },
+      (error: unknown) => {
+        if (
+          !(error instanceof Error) ||
+          !("code" in error) ||
+          error.code !== "INVALID_RESEARCH_INPUT"
+        ) {
+          throw error;
+        }
+      },
+    );
     return unpaid("FAILED_NOT_CHARGED");
   }
   if (name === "quote-expired" || name === "input-mismatch") {
@@ -545,9 +578,26 @@ export async function runScenario(
       "wrong-network": "wrong-chain",
       "insufficient-balance": "insufficient-funds",
     } as const;
-    await new FakeWallet({ fault: faults[name] })
-      .sign(FIXTURE_QUOTE)
-      .catch(() => undefined);
+    const wallet = new FakeWallet({ fault: faults[name] });
+    const expectedError = {
+      "wallet-rejected": "WALLET_REFUSED",
+      "wrong-network": "WRONG_CHAIN",
+      "insufficient-balance": "INSUFFICIENT_FUNDS",
+    } as const;
+    await wallet.sign(FIXTURE_QUOTE).then(
+      () => {
+        throw new Error("WALLET_FAULT_WAS_ACCEPTED");
+      },
+      (error: unknown) => {
+        if (
+          !(error instanceof Error) ||
+          error.message !== expectedError[name]
+        ) {
+          throw error;
+        }
+      },
+    );
+    if (wallet.signCount !== 0) throw new Error("WALLET_FAULT_WAS_SIGNED");
     return unpaid("QUOTED");
   }
   if (name === "handler-timeout") {

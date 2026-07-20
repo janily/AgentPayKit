@@ -34,4 +34,11 @@ if [[ ! -f "$SEPOLIA_RELEASE_FILE" || ! -f "$SEPOLIA_E2E_DRIVER" ]]; then
   exit 2
 fi
 
+preflight_home="$(mktemp -d)"
+trap 'rm -rf "$preflight_home"' EXIT
+AGENTPAYKIT_HOME="$preflight_home" node packages/cli/dist/index.js release verify \
+  --environment testnet \
+  --release "$SEPOLIA_RELEASE_FILE" \
+  --json
+
 pnpm vitest run tests/e2e/sepolia.test.ts --reporter=verbose

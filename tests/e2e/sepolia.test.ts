@@ -117,17 +117,30 @@ describe.skipIf(!enabled)("Base Sepolia release gate", () => {
       environment?: string;
       network?: string;
       amount?: string;
+      asset?: string;
       payee?: string;
       runtimeDelegation?: {
-        payload?: { runtimeKeyId?: string; runtimePublicKey?: string };
+        payload?: {
+          runtimeKeyId?: string;
+          runtimePublicKey?: string;
+          runtimeUrl?: string;
+        };
       };
     };
     expect(release).toMatchObject({
       environment: "testnet",
       network: "eip155:84532",
       amount: "10000",
-      payee: env.SEPOLIA_PAYEE_ADDRESS,
     });
+    expect(release.payee?.toLowerCase()).toBe(
+      env.SEPOLIA_PAYEE_ADDRESS.toLowerCase(),
+    );
+    expect(release.asset?.toLowerCase()).toBe(
+      env.SEPOLIA_USDC_ADDRESS.toLowerCase(),
+    );
+    expect(release.runtimeDelegation?.payload?.runtimeUrl).toBe(
+      env.SEPOLIA_RUNTIME_URL,
+    );
     expect(release.releaseId).toMatch(/^rel_[0-9a-f]{64}$/);
     const walletBefore = await balance(env, env.SEPOLIA_WALLET_ADDRESS);
     const payeeBefore = await balance(env, env.SEPOLIA_PAYEE_ADDRESS);
@@ -187,6 +200,7 @@ describe.skipIf(!enabled)("Base Sepolia release gate", () => {
           ).toString(),
         )) as { payload: unknown; signature: CanonicalSignature };
         const status = parseStatusEnvelope(signedStatus.payload);
+        expect(signedStatus.signature.keyId).toBe(runtimeIdentity.runtimeKeyId);
         expect(
           await verifyCanonicalSignature(
             "runtime-status-v1",
@@ -253,6 +267,9 @@ describe.skipIf(!enabled)("Base Sepolia release gate", () => {
           payee: env.SEPOLIA_PAYEE_ADDRESS,
           network: "eip155:84532",
         });
+        expect(signedReceipt.signature.keyId).toBe(
+          runtimeIdentity.runtimeKeyId,
+        );
         expect(
           await verifyCanonicalSignature(
             "runtime-receipt-v1",
@@ -274,6 +291,7 @@ describe.skipIf(!enabled)("Base Sepolia release gate", () => {
         receiptDigest: verifiedReceiptDigest,
         finalStatus: actual.finalStatus,
         chargeState: actual.chargeState,
+        outcome: actual,
       });
     }
 

@@ -5,6 +5,11 @@ import { expect, test } from "vitest";
 
 import { credentialMatches } from "./helpers/scan";
 
+test("detects the CDP credential name used by the Sepolia gate", () => {
+  const assignment = ["CDP_API_KEY", '_SECRET="', 'test-only-value"'].join("");
+  expect(credentialMatches(assignment)).not.toEqual([]);
+});
+
 test("tracked source, fixtures, evidence, and logs contain no credential material", async () => {
   const paths = execFileSync("git", ["ls-files"], { encoding: "utf8" })
     .trim()
