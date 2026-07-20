@@ -25,7 +25,7 @@
 - [x] 覆盖 verify reject、settle timeout/revert/success、AuthorizationUsed found/missing、Queue duplicate、R2/D1 failure、wallet refusal/wrong chain/insufficient funds。
 - [x] 运行 testkit tests；预期 exports 缺失失败。
 - [x] 实现可注入时钟/nonce/Invocation ID，禁止测试依赖 wall clock 或随机 flaky timing。
-- [ ] 提交：`git commit -m "testkit: add deterministic payment fault injection"`。
+- [x] 提交：`git commit -m "testkit: add deterministic payment fault injection"`（`d3c69a8`）。
 
 ### Task 2: Automate the twelve acceptance scenarios
 
@@ -35,7 +35,7 @@
 - [x] 以 testkit 运行全部场景；在实现前预期至少一个断言失败以验证 runner 会阻断。
 - [x] 修正 test harness/产品缺陷，禁止降低断言；生成 `artifacts/e2e-simulated.json`。
 - [x] 运行 `pnpm vitest run tests/e2e/scenarios --reporter=verbose`；预期 12 files passed。
-- [ ] 提交：`git commit -m "test(e2e): cover the twelve paid invocation scenarios"`。
+- [x] 提交：`git commit -m "test(e2e): cover the twelve paid invocation scenarios"`（`093583f`）。
 
 ### Task 3: Run security, retention and dual-agent installation gates
 
@@ -45,7 +45,7 @@
 - [x] 扫描 source、bundle、fixtures、logs、evidence，拒绝 key、seed、Payment Payload、完整输入标记。
 - [x] 在隔离 HOME 一条命令安装，分别从 Codex 与 Claude Code adapter 调用同一 fake Runtime，并断言共享 Client inode/path 相同。
 - [x] 运行 `pnpm vitest run tests/security tests/integration/dual-agent-install.test.ts`；预期全部通过。
-- [ ] 提交：`git commit -m "test(security): gate package bridge logs and dual-agent install"`。
+- [x] 提交：`git commit -m "test(security): gate package bridge logs and dual-agent install"`（`5059c00`）。
 
 ### Task 4: Execute the Base Sepolia release gate
 
