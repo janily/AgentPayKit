@@ -16,7 +16,7 @@
       "failed": 0
     },
     "globalVerification": {
-      "capturedAt": "2026-07-20T15:32:12Z",
+      "capturedAt": "2026-07-20T15:55:13Z",
       "commands": [
         "pnpm install --frozen-lockfile",
         "pnpm format:check",
