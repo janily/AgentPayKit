@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 
 import {
+  validateEvidenceLineage,
   validateSecurityEvidence,
   validateSepoliaEvidence,
   validateSimulatedEvidence,
@@ -82,7 +83,6 @@ const trackedEvidence = spawnSync(
   ["ls-files", "--error-unmatch", "artifacts/e2e-sepolia.json"],
   { encoding: "utf8" },
 );
-if (trackedEvidence.status !== 0) fail("SEPOLIA_EVIDENCE_NOT_TRACKED");
 const testedCommitIsAncestor = spawnSync(
   "git",
   [
@@ -93,14 +93,6 @@ const testedCommitIsAncestor = spawnSync(
   ],
   { encoding: "utf8" },
 );
-if (testedCommitIsAncestor.status !== 0) {
-  fail("SEPOLIA_TESTED_COMMIT_NOT_ANCESTOR");
-}
-const evidenceOnlyPaths = new Set([
-  "artifacts/e2e-sepolia.json",
-  "artifacts/release-evidence.json",
-  "docs/acceptance/m7-sepolia.md",
-]);
 const changesAfterTest = spawnSync(
   "git",
   [
@@ -111,13 +103,12 @@ const changesAfterTest = spawnSync(
   { encoding: "utf8" },
 );
 const changedPaths = changesAfterTest.stdout.trim().split("\n").filter(Boolean);
-if (
-  changesAfterTest.status !== 0 ||
-  !changedPaths.includes("artifacts/e2e-sepolia.json") ||
-  changedPaths.some((path) => !evidenceOnlyPaths.has(path))
-) {
-  fail("NON_EVIDENCE_CHANGE_AFTER_SEPOLIA_GATE");
-}
+validateEvidenceLineage({
+  trackedStatus: trackedEvidence.status,
+  ancestorStatus: testedCommitIsAncestor.status,
+  changesStatus: changesAfterTest.status,
+  changedPaths,
+});
 
 const spend = spawnSync(
   process.execPath,

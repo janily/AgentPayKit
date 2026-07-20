@@ -22,6 +22,12 @@ const chainScenarios = new Set([
   "cli-resume",
 ]);
 
+const evidenceOnlyPaths = new Set([
+  "artifacts/e2e-sepolia.json",
+  "artifacts/release-evidence.json",
+  "docs/acceptance/m7-sepolia.md",
+]);
+
 export function evidenceFailure(code) {
   throw new Error(`${code}. No transaction was broadcast.`);
 }
@@ -82,6 +88,28 @@ export function validateSecurityEvidence(security) {
     new Set(security.gates).size !== 8
   ) {
     evidenceFailure("SECURITY_GATE_NOT_PASSED");
+  }
+}
+
+export function validateEvidenceLineage({
+  trackedStatus,
+  ancestorStatus,
+  changesStatus,
+  changedPaths,
+}) {
+  if (trackedStatus !== 0) {
+    evidenceFailure("SEPOLIA_EVIDENCE_NOT_TRACKED");
+  }
+  if (ancestorStatus !== 0) {
+    evidenceFailure("SEPOLIA_TESTED_COMMIT_NOT_ANCESTOR");
+  }
+  if (
+    changesStatus !== 0 ||
+    !Array.isArray(changedPaths) ||
+    !changedPaths.includes("artifacts/e2e-sepolia.json") ||
+    changedPaths.some((path) => !evidenceOnlyPaths.has(path))
+  ) {
+    evidenceFailure("NON_EVIDENCE_CHANGE_AFTER_SEPOLIA_GATE");
   }
 }
 

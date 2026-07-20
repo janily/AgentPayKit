@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import {
   expectedOutcome,
   expectedScenarios,
+  validateEvidenceLineage,
   validateSecurityEvidence,
   validateSepoliaEvidence,
   validateSimulatedEvidence,
@@ -132,5 +133,63 @@ describe("Mainnet evidence validation", () => {
     expect(() =>
       validateSimulatedEvidence({ passed: 12, failed: 0, results }),
     ).toThrow("SIMULATED_GATE_NOT_PASSED");
+  });
+
+  test.each([
+    [
+      "untracked Sepolia evidence",
+      { trackedStatus: 1 },
+      "SEPOLIA_EVIDENCE_NOT_TRACKED",
+    ],
+    [
+      "a tested commit outside the candidate history",
+      { ancestorStatus: 1 },
+      "SEPOLIA_TESTED_COMMIT_NOT_ANCESTOR",
+    ],
+    [
+      "a failed history diff",
+      { changesStatus: 1 },
+      "NON_EVIDENCE_CHANGE_AFTER_SEPOLIA_GATE",
+    ],
+    [
+      "a history without the committed Sepolia report",
+      { changedPaths: ["artifacts/release-evidence.json"] },
+      "NON_EVIDENCE_CHANGE_AFTER_SEPOLIA_GATE",
+    ],
+    [
+      "a source change after the Sepolia run",
+      {
+        changedPaths: [
+          "artifacts/e2e-sepolia.json",
+          "packages/cli/src/index.ts",
+        ],
+      },
+      "NON_EVIDENCE_CHANGE_AFTER_SEPOLIA_GATE",
+    ],
+  ])("rejects %s", (_name, overrides, code) => {
+    expect(() =>
+      validateEvidenceLineage({
+        trackedStatus: 0,
+        ancestorStatus: 0,
+        changesStatus: 0,
+        changedPaths: ["artifacts/e2e-sepolia.json"],
+        ...overrides,
+      }),
+    ).toThrow(code);
+  });
+
+  test("accepts evidence-only descendants of the tested commit", () => {
+    expect(() =>
+      validateEvidenceLineage({
+        trackedStatus: 0,
+        ancestorStatus: 0,
+        changesStatus: 0,
+        changedPaths: [
+          "artifacts/e2e-sepolia.json",
+          "artifacts/release-evidence.json",
+          "docs/acceptance/m7-sepolia.md",
+        ],
+      }),
+    ).not.toThrow();
   });
 });
