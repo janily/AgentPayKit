@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1",
   "releaseStatus": "not_ready",
-  "candidateCommit": "0f1d3fac55a07d1bbc26119026b8e8267bda4f38",
+  "candidateCommit": "f4afeacb82962c9d10ae0d04ec4a766cb90ea51f",
   "network": "eip155:8453",
   "priceAtomic": "10000",
   "automated": {
@@ -16,7 +16,7 @@
       "failed": 0
     },
     "globalVerification": {
-      "capturedAt": "2026-07-20T15:18:55Z",
+      "capturedAt": "2026-07-20T15:27:15Z",
       "commands": [
         "pnpm install --frozen-lockfile",
         "pnpm format:check",
