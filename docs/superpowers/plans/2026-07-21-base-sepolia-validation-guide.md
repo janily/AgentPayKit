@@ -106,7 +106,7 @@
   Run:
 
   ```bash
-  rg -o '\b(CDP_API_KEY_ID|CDP_API_KEY_SECRET|CLOUDFLARE_ACCOUNT_ID|SEPOLIA_[A-Z_]+)\b' scripts/e2e-sepolia.sh docs/runbooks/base-sepolia-validation.md | sort -u
+  rg -o '\b(CDP_API_KEY_ID|CDP_API_KEY_SECRET|CLOUDFLARE_ACCOUNT_ID|SEPOLIA_[A-Z0-9_]+)\b' scripts/e2e-sepolia.sh docs/runbooks/base-sepolia-validation.md | sort -u
   ```
 
   Expected: Runbook 覆盖脚本要求的全部十个变量，没有杜撰额外必需变量。
