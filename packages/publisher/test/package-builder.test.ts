@@ -6,6 +6,7 @@ import { describe, expect, test } from "vitest";
 
 import {
   buildSkillPackage,
+  deterministicTar,
   prepareSkillPackage,
   readDeterministicTar,
   verifySkillPackageDigest,
@@ -88,6 +89,41 @@ describe("deterministic skill packages", () => {
     });
     await expect(prepareSkillPackage(secret)).rejects.toThrow(
       "SECRET_FILE_REJECTED",
+    );
+  });
+
+  test("rejects appended bytes, duplicate paths, checksum and padding tamper", async () => {
+    const root = await project({ "handler.ts": "export default {};\n" });
+    const prepared = await prepareSkillPackage(root);
+    const canonical = deterministicTar(prepared.entries);
+
+    const appended = new Uint8Array(canonical.length + 3);
+    appended.set(canonical);
+    appended.set([1, 2, 3], canonical.length);
+    expect(() => readDeterministicTar(appended)).toThrow(
+      "NON_CANONICAL_ARCHIVE",
+    );
+
+    expect(() =>
+      readDeterministicTar(
+        deterministicTar([prepared.entries[0]!, prepared.entries[0]!]),
+      ),
+    ).toThrow("DUPLICATE_ARCHIVE_PATH");
+
+    const checksumTamper = Uint8Array.from(canonical);
+    checksumTamper[0] ^= 1;
+    expect(() => readDeterministicTar(checksumTamper)).toThrow(
+      "INVALID_ARCHIVE_CHECKSUM",
+    );
+
+    const firstSize = [...prepared.entries].sort((left, right) =>
+      left.path.localeCompare(right.path),
+    )[0]!.bytes.byteLength;
+    const paddingOffset = 512 + firstSize;
+    const paddingTamper = Uint8Array.from(canonical);
+    paddingTamper[paddingOffset] = 1;
+    expect(() => readDeterministicTar(paddingTamper)).toThrow(
+      "NON_CANONICAL_ARCHIVE_PADDING",
     );
   });
 });

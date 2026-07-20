@@ -142,6 +142,26 @@ describe("LoopbackBridgeServer security", () => {
     expect(html).not.toContain("private research prompt");
   });
 
+  test("serves embedded assets for a single-file client bundle", async () => {
+    server = await LoopbackBridgeServer.start({
+      platform: "darwin",
+      staticAssets: {
+        "assets/bridge.js": "globalThis.__embeddedBridge = true;",
+        "assets/bridge.css": "body{color:green}",
+      },
+    });
+    await expect(
+      fetch(`http://127.0.0.1:${server.port}/assets/bridge.js`).then(
+        (response) => response.text(),
+      ),
+    ).resolves.toContain("__embeddedBridge");
+    await expect(
+      fetch(`http://127.0.0.1:${server.port}/assets/bridge.css`).then(
+        (response) => response.text(),
+      ),
+    ).resolves.toContain("color:green");
+  });
+
   test("refuses to start outside macOS", async () => {
     await expect(
       LoopbackBridgeServer.start({ platform: "linux" }),

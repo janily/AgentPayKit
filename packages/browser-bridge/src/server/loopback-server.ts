@@ -53,7 +53,10 @@ export class LoopbackBridgeServer {
     private readonly server: ReturnType<typeof createServer>,
     port: number,
     store: SessionStore,
-    private readonly staticRoot: URL,
+    private readonly staticRoot: URL | undefined,
+    private readonly staticAssets: Readonly<
+      Record<string, string | Uint8Array>
+    >,
   ) {
     this.port = port;
     this.origin = `http://127.0.0.1:${port}`;
@@ -64,6 +67,7 @@ export class LoopbackBridgeServer {
     options: {
       store?: SessionStore;
       staticRoot?: URL;
+      staticAssets?: Readonly<Record<string, string | Uint8Array>>;
       platform?: NodeJS.Platform;
     } = {},
   ): Promise<LoopbackBridgeServer> {
@@ -88,7 +92,11 @@ export class LoopbackBridgeServer {
       server,
       address.port,
       store,
-      options.staticRoot ?? new URL("../../dist/", import.meta.url),
+      options.staticRoot ??
+        (options.staticAssets
+          ? undefined
+          : new URL("../../dist/", import.meta.url)),
+      options.staticAssets ?? {},
     );
     return bridge;
   }
@@ -161,7 +169,12 @@ export class LoopbackBridgeServer {
         const filename = url.pathname.endsWith(".js")
           ? "assets/bridge.js"
           : "assets/bridge.css";
-        const content = await readFile(new URL(filename, this.staticRoot));
+        const content =
+          this.staticAssets[filename] ??
+          (this.staticRoot
+            ? await readFile(new URL(filename, this.staticRoot))
+            : undefined);
+        if (content === undefined) throw new Error("BRIDGE_ASSET_MISSING");
         response.statusCode = 200;
         response.setHeader(
           "content-type",

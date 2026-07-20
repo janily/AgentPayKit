@@ -61,23 +61,81 @@ function string(bytes: Uint8Array): string {
   return new TextDecoder().decode(bytes).replace(/\0.*$/s, "");
 }
 
+function equal(left: Uint8Array, right: Uint8Array): boolean {
+  return (
+    left.byteLength === right.byteLength &&
+    left.every((byte, index) => byte === right[index])
+  );
+}
+
+function parseOctal(bytes: Uint8Array, field: string): number {
+  const value = string(bytes).trim();
+  if (!/^[0-7]+$/.test(value)) throw new Error(`INVALID_ARCHIVE_${field}`);
+  const parsed = Number.parseInt(value, 8);
+  if (!Number.isSafeInteger(parsed))
+    throw new Error(`INVALID_ARCHIVE_${field}`);
+  return parsed;
+}
+
 export function readDeterministicTar(bytes: Uint8Array): ArchiveEntry[] {
+  if (bytes.byteLength < 1024 || bytes.byteLength % 512 !== 0) {
+    throw new Error("NON_CANONICAL_ARCHIVE");
+  }
   const entries: ArchiveEntry[] = [];
+  const paths = new Set<string>();
   let offset = 0;
   while (offset + 512 <= bytes.byteLength) {
     const header = bytes.slice(offset, offset + 512);
-    if (header.every((byte) => byte === 0)) break;
+    if (header.every((byte) => byte === 0)) {
+      const second = bytes.slice(offset + 512, offset + 1024);
+      if (
+        second.byteLength !== 512 ||
+        !second.every((byte) => byte === 0) ||
+        offset + 1024 !== bytes.byteLength
+      ) {
+        throw new Error("NON_CANONICAL_ARCHIVE");
+      }
+      if (!equal(bytes, deterministicTar(entries))) {
+        throw new Error("NON_CANONICAL_ARCHIVE");
+      }
+      return entries;
+    }
+    if (
+      string(header.slice(257, 263)) !== "ustar" ||
+      string(header.slice(263, 265)) !== "00" ||
+      header[156] !== "0".charCodeAt(0)
+    ) {
+      throw new Error("INVALID_ARCHIVE_HEADER");
+    }
+    const storedChecksum = parseOctal(header.slice(148, 156), "CHECKSUM_FIELD");
+    const checksumHeader = Uint8Array.from(header);
+    checksumHeader.fill(0x20, 148, 156);
+    if (
+      checksumHeader.reduce((sum, byte) => sum + byte, 0) !== storedChecksum
+    ) {
+      throw new Error("INVALID_ARCHIVE_CHECKSUM");
+    }
     const path = string(header.slice(0, 100));
-    const size = Number.parseInt(string(header.slice(124, 136)).trim(), 8);
-    if (!path || !Number.isSafeInteger(size))
-      throw new Error("INVALID_ARCHIVE");
+    if (!path || path.startsWith("/") || path.split("/").includes("..")) {
+      throw new Error("UNSAFE_ARCHIVE_PATH");
+    }
+    if (paths.has(path)) throw new Error("DUPLICATE_ARCHIVE_PATH");
+    paths.add(path);
+    const size = parseOctal(header.slice(124, 136), "SIZE");
+    const mode = parseOctal(header.slice(100, 108), "MODE");
     offset += 512;
+    if (offset + size > bytes.byteLength) throw new Error("TRUNCATED_ARCHIVE");
     entries.push({
       path,
       bytes: bytes.slice(offset, offset + size),
-      mode: 0o644,
+      mode,
     });
-    offset += Math.ceil(size / 512) * 512;
+    offset += size;
+    const padding = (512 - (size % 512)) % 512;
+    if (!bytes.slice(offset, offset + padding).every((byte) => byte === 0)) {
+      throw new Error("NON_CANONICAL_ARCHIVE_PADDING");
+    }
+    offset += padding;
   }
-  return entries;
+  throw new Error("TRUNCATED_ARCHIVE");
 }

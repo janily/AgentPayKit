@@ -7,6 +7,16 @@ import { LOCAL_BUDGET_SCHEMA } from "./local-schema";
 const { DatabaseSync: NodeDatabaseSync } = createRequire(import.meta.url)(
   "node:sqlite",
 ) as typeof import("node:sqlite");
+const schemaRetrySignal = new Int32Array(new SharedArrayBuffer(4));
+
+function isBusy(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "errcode" in error &&
+    error.errcode === 5
+  );
+}
 
 export type ReservationState =
   "reserved" | "authorized" | "settled" | "released" | "unknown";
@@ -48,7 +58,16 @@ export class BudgetStore {
 
   constructor(path: string) {
     this.database = new NodeDatabaseSync(path);
-    this.database.exec(LOCAL_BUDGET_SCHEMA);
+    this.database.exec("PRAGMA busy_timeout = 5000;");
+    for (let attempt = 0; ; attempt += 1) {
+      try {
+        this.database.exec(LOCAL_BUDGET_SCHEMA);
+        break;
+      } catch (error) {
+        if (!isBusy(error) || attempt === 49) throw error;
+        Atomics.wait(schemaRetrySignal, 0, 0, 100);
+      }
+    }
   }
 
   configure(input: { singleLimit: string; dailyLimit: string }): void {

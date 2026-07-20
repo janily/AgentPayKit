@@ -14,7 +14,7 @@ required=(
   MAINNET_RPC_URL
   MAINNET_USDC_ADDRESS
   MAINNET_BUDGET_LIMIT_ATOMIC
-  AGENTPAY_MAINNET_CONFIRM
+  AGENTPAYKIT_HOME
 )
 missing=()
 for name in "${required[@]}"; do
@@ -32,6 +32,11 @@ if [[ ! -f "$MAINNET_RELEASE_FILE" ]]; then
   exit 2
 fi
 
+if [[ -n "$(git status --porcelain)" ]]; then
+  echo "Mainnet preflight requires a clean worktree. No transaction was broadcast." >&2
+  exit 2
+fi
+
 git verify-commit HEAD >/dev/null
 tag="$(git tag --points-at HEAD | head -n 1)"
 if [[ -z "$tag" ]]; then
@@ -40,6 +45,9 @@ if [[ -z "$tag" ]]; then
 fi
 git verify-tag "$tag" >/dev/null
 
+export AGENTPAY_PREFLIGHT_COMMIT="$(git rev-parse HEAD)"
+pnpm vitest run tests/e2e/scenarios --reporter=verbose
+pnpm vitest run tests/security tests/integration/dual-agent-install.test.ts --reporter=verbose
 node scripts/mainnet-preflight.mjs
 
 preflight_home="$(mktemp -d)"
@@ -48,5 +56,17 @@ AGENTPAYKIT_HOME="$preflight_home" node packages/cli/dist/index.js release verif
   --environment mainnet \
   --release "$MAINNET_RELEASE_FILE" \
   --json
+
+release_id="$(node -e 'const fs=require("node:fs"); const value=JSON.parse(fs.readFileSync(process.env.MAINNET_RELEASE_FILE,"utf8")); console.log((value.payload ?? value).releaseId)')"
+expected="ACCEPT MAINNET $release_id"
+if [[ ! -t 0 ]]; then
+  echo "Mainnet confirmation requires an interactive terminal. No transaction was broadcast." >&2
+  exit 2
+fi
+read -r -p "Type '$expected' to finish preflight: " confirmation
+if [[ "$confirmation" != "$expected" ]]; then
+  echo "Mainnet confirmation mismatch. No transaction was broadcast." >&2
+  exit 2
+fi
 
 echo "Mainnet preflight passed. This command did not sign or broadcast a transaction."

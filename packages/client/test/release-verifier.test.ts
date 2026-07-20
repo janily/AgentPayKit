@@ -78,7 +78,9 @@ describe("StrictReleaseVerifier", () => {
   test("verifies the published EIP-191 Release and delegated Runtime", async () => {
     const skill = await fixture();
     await expect(
-      new StrictReleaseVerifier().verify(skill),
+      new StrictReleaseVerifier(
+        () => new Date("2026-07-20T00:00:00.000Z"),
+      ).verify(skill),
     ).resolves.toMatchObject({
       releaseId: skill.release.payload.releaseId,
       packageDigest: skill.release.payload.packageDigest,
@@ -94,7 +96,9 @@ describe("StrictReleaseVerifier", () => {
     const skill = await fixture();
     skill.packageBytes[520] ^= 1;
     await expect(
-      new StrictReleaseVerifier().verify(skill),
+      new StrictReleaseVerifier(
+        () => new Date("2026-07-20T00:00:00.000Z"),
+      ).verify(skill),
     ).rejects.toMatchObject({
       code: "PACKAGE_DIGEST_MISMATCH",
     });

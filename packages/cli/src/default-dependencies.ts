@@ -22,6 +22,7 @@ import {
 } from "@agentpaykit/publisher";
 
 import type { CliDependencies } from "./main";
+import { BRIDGE_ASSETS } from "./bridge-assets";
 
 const crockford = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
 
@@ -178,9 +179,8 @@ async function config(path: string): Promise<{
 }
 
 export async function createDefaultDependencies(): Promise<CliDependencies> {
-  const root = resolve(
-    process.env.AGENTPAYKIT_HOME ?? join(homedir(), ".agentpaykit"),
-  );
+  const home = resolve(process.env.AGENTPAYKIT_HOME ?? homedir());
+  const root = join(home, ".agentpaykit");
   await mkdir(root, { recursive: true, mode: 0o700 });
   const budgetStore = new BudgetStore(join(root, "budget.sqlite"));
   const localConfig = await config(join(root, "config.json"));
@@ -203,7 +203,7 @@ export async function createDefaultDependencies(): Promise<CliDependencies> {
     paymentAuthorizer: {
       async authorize({ paymentRequired, quote }) {
         const bridge = await LoopbackBridgeServer.start({
-          staticRoot: new URL("./bridge/", import.meta.url),
+          staticAssets: BRIDGE_ASSETS,
         });
         try {
           const session = bridge.createSession({

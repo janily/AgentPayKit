@@ -86,9 +86,9 @@ describe("official Deep Research Lite package", () => {
       mainnetReleaseId: mainnet.payload.releaseId,
     }).toMatchInlineSnapshot(`
       {
-        "mainnetReleaseId": "rel_a08de5809ca724010a4ec45ebbfc7de590eaab1d902ce522ebeaca7aa2a78c86",
-        "packageDigest": "sha256:c81fe6b1031c79024bd80830883a7997b36b4e7e34a782390a1403998f5cab55",
-        "testnetReleaseId": "rel_0fdf24542344f31741805cd89e696c4b1f89ec1f6619dca444edf14f0c27936b",
+        "mainnetReleaseId": "rel_a140a34927220617d439913e1b8797e90971f266031466f33f209333137177f9",
+        "packageDigest": "sha256:4e6e65cdbf5e8fb3c320372a036e4fbe4815d5234ea06075cb8a5bb880ff3581",
+        "testnetReleaseId": "rel_f68acce08e7c51e28be14d26989d03def6db074f58dba7ed6b30cdc46f30d81c",
       }
     `);
   });

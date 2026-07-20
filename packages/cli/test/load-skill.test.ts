@@ -13,7 +13,9 @@ test("loads and verifies an installed apkg without a sidecar descriptor", async 
   const skill = await loadSkill(path);
 
   await expect(
-    new StrictReleaseVerifier().verify(skill),
+    new StrictReleaseVerifier(
+      () => new Date("2026-07-20T00:00:00.000Z"),
+    ).verify(skill),
   ).resolves.toMatchObject({
     releaseId: built.releaseId,
     runtime: { url: "https://runtime.example.test" },

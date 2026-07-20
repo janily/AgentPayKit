@@ -106,6 +106,11 @@ describe("atomic dual-agent installer", () => {
     expect((await lstat(first.codexEntry)).isSymbolicLink()).toBe(true);
     expect(await readlink(first.codexEntry)).toBe(first.currentEntry);
     expect(await readlink(first.claudeEntry)).toBe(first.currentEntry);
+    await expect(
+      readFile(first.configFile, "utf8").then(JSON.parse),
+    ).resolves.toMatchObject({
+      budget: { singleLimit: "10000", dailyLimit: "20000" },
+    });
     expect(await readFile(first.codexEntry, "utf8")).toContain(
       `--skill ${first.packageFile}`,
     );

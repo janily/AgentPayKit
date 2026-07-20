@@ -7,6 +7,7 @@ export function installLayout(home: string, name: string, releaseId: string) {
     sharedRoot,
     clientRoot: join(sharedRoot, "client", "0.1.0"),
     clientBin: join(sharedRoot, "client", "0.1.0", "agentpay"),
+    configFile: join(sharedRoot, "config.json"),
     skillRoot,
     packageFile: join(skillRoot, "package.apkg"),
     currentEntry: join(sharedRoot, "skills", name, "current.md"),

@@ -75,6 +75,7 @@ export async function installSkill(input: {
     release.payload.releaseId,
   );
   const hasClient = await exists(layout.clientBin);
+  const hasConfig = await exists(layout.configFile);
   if (!hasClient && !input.clientBytes) {
     throw new InstallError(
       "AGENTPAY_CLIENT_MISSING",
@@ -116,6 +117,17 @@ export async function installSkill(input: {
         0o700,
       );
       if (input.failAt === "client") throw new Error("INJECTED_WRITE_FAILURE");
+    }
+    if (!hasConfig) {
+      await transaction.file(
+        layout.configFile,
+        new TextEncoder().encode(
+          `${JSON.stringify({
+            schemaVersion: "1",
+            budget: { singleLimit: "10000", dailyLimit: "20000" },
+          })}\n`,
+        ),
+      );
     }
     if (!packageExists) {
       await transaction.file(
@@ -163,6 +175,7 @@ export async function doctorInstall(
 ): Promise<void> {
   for (const path of [
     layout.clientBin,
+    layout.configFile,
     layout.packageFile,
     layout.currentEntry,
     layout.codexEntry,

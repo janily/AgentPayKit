@@ -10,11 +10,13 @@ This gate uses two distinct, isolated low-value wallets. It never runs in normal
 4. Codex and Claude Code use different wallets. Each wallet contains only the small balance needed for one acceptance call plus gas.
 5. The local daily budget is exactly `20000` atomic units (`0.02` USDC).
 
-Export the variables listed by `scripts/mainnet-preflight.sh`, then set the dynamic confirmation to `ACCEPT MAINNET <release-id>` and run:
+Export the variables listed by `scripts/mainnet-preflight.sh`, including `AGENTPAYKIT_HOME` for the actual installed Client, and run from an interactive terminal:
 
 ```bash
 AGENTPAY_E2E_MAINNET=1 bash scripts/mainnet-preflight.sh
 ```
+
+The script reruns simulated/security gates, reads the real Client SQLite budget through `agentpay spend`, and then asks you to type the dynamic confirmation `ACCEPT MAINNET <release-id>`; it does not accept confirmation through an environment variable.
 
 Stop if any displayed network, payee, asset, amount, Release ID, or wallet differs from the reviewed values.
 

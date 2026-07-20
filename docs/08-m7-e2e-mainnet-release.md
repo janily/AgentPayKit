@@ -73,8 +73,8 @@
 **Files:** Create `docs/acceptance/third-party-script.md`, `docs/acceptance/mvp-dod.md`, `artifacts/release-evidence.json`, release checklist.
 
 - [ ] 由未参与开发的 macOS 测试者仅使用发布文档，在 30 分钟内完成安装、doctor、Codex 调用、Claude Code 调用、status/resume 与卸载；记录耗时和阻塞点。
-- [ ] 对 PRD DoD 逐项绑定自动测试名或脱敏 evidence 字段；无证据项保持 unchecked 并阻断 release。
-- [ ] 运行最终命令：`pnpm install --frozen-lockfile && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build`。
+- [x] 对 PRD DoD 逐项绑定自动测试名或脱敏 evidence 字段；无证据项保持 unchecked 并阻断 release。
+- [x] 运行最终命令：`pnpm install --frozen-lockfile && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build`。
 - [ ] 运行 `git status --short`，确认仅保留明确计划纳入的 evidence；生成不可变 release tag 候选。
 - [ ] 请求独立代码审查与安全审查，解决全部 blocking findings 后重新跑 Gate。
 - [ ] 提交：`git commit -m "docs: complete AgentPayKit MVP release evidence"`。
@@ -82,8 +82,8 @@
 ## M7 Definition of Done
 
 - [ ] 12 个场景模拟与 Sepolia 报告均 `failed=0`。
-- [ ] 安全、secret、log、bundle 扫描泄露数为零。
+- [x] 安全、secret、log、bundle 扫描泄露数为零。
 - [ ] Codex 与 Claude Code 各完成一笔 Mainnet `0.01` USDC 调用。
-- [ ] 同一 Invocation 从未重复执行、签名或结算；unknown settlement 可恢复。
+- [ ] 同一 Invocation 从未重复执行、签名或结算；unknown settlement 可恢复（模拟门禁已覆盖，等待真实 Sepolia 证据）。
 - [ ] 第三方在 30 分钟内完成双 Agent 安装与调用。
 - [ ] PRD 每个 DoD 都有测试或 evidence，最终六条全局验证命令退出码为 `0`。

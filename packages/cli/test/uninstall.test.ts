@@ -48,4 +48,13 @@ describe("uninstall command", () => {
     expect(await exists(layout.claudeEntry)).toBe(false);
     expect(await exists(layout.clientBin)).toBe(true);
   });
+
+  test("reports an absent target without removing the shared client", async () => {
+    const home = await mkdtemp(
+      join(tmpdir(), "agentpay-cli-uninstall-missing-"),
+    );
+    await expect(
+      uninstallCommand(["research-lite", `rel_${"b".repeat(64)}`], home),
+    ).resolves.toMatchObject({ removed: false });
+  });
 });

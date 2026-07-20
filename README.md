@@ -41,6 +41,8 @@ The default test suite never broadcasts a transaction. Real Base Sepolia and Mai
 
 The ordered M0–M7 implementation plans are indexed in [`docs/00-plan-index.md`](docs/00-plan-index.md). Upstream provenance and the exact adaptation boundary are recorded in [`docs/upstream/paybot-baseline.md`](docs/upstream/paybot-baseline.md).
 
+Release acceptance is fail-closed. The [MVP evidence map](docs/acceptance/mvp-dod.md) distinguishes automated local coverage from the still-required real Sepolia, controlled Mainnet and independent 30-minute gates.
+
 ## License
 
 The original MIT license is preserved in [`LICENSE`](LICENSE).

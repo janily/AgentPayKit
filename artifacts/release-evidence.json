@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "1",
+  "releaseStatus": "not_ready",
+  "baseCommit": "00cf4ba4994cdaba5a1888c4a2721d7ad47dbffa",
+  "network": "eip155:8453",
+  "priceAtomic": "10000",
+  "automated": {
+    "simulated": {
+      "path": "artifacts/e2e-simulated.json",
+      "passed": 12,
+      "failed": 0
+    },
+    "security": {
+      "path": "artifacts/security-gates.json",
+      "passed": 8,
+      "failed": 0
+    },
+    "globalVerification": {
+      "capturedAt": "2026-07-20T14:50:53Z",
+      "commands": [
+        "pnpm install --frozen-lockfile",
+        "pnpm format:check",
+        "pnpm lint",
+        "pnpm typecheck",
+        "pnpm test",
+        "pnpm build"
+      ],
+      "passed": true
+    }
+  },
+  "external": {
+    "sepolia": {
+      "path": "artifacts/e2e-sepolia.json",
+      "passed": false
+    },
+    "mainnet": {
+      "path": "docs/acceptance/m7-mainnet.json",
+      "codexPassed": false,
+      "claudeCodePassed": false
+    },
+    "thirdPartyThirtyMinute": {
+      "path": "docs/acceptance/third-party-script.md",
+      "passed": false
+    }
+  },
+  "releaseTagCandidate": null,
+  "blockingReasons": [
+    "Base Sepolia release gate has not been executed with external credentials.",
+    "Dual-Agent Base Mainnet human acceptance has not been executed.",
+    "Independent third-party 30-minute acceptance has not been executed.",
+    "Signed release commit and tag do not yet exist."
+  ],
+  "secretsStored": false
+}

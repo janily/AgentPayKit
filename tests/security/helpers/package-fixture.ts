@@ -68,5 +68,8 @@ export async function securityPackageFixture() {
   return {
     ...(await buildSkillPackage({ root: project, release })),
     releaseId: release.payload.releaseId,
+    packageDigest: prepared.digest,
+    runtimePublicKey,
+    runtimeSigningSeed: testSeed,
   };
 }

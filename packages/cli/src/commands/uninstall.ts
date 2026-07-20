@@ -1,3 +1,4 @@
+import { lstat } from "node:fs/promises";
 import { homedir } from "node:os";
 
 import { uninstallSkill } from "@agentpaykit/installer";
@@ -16,9 +17,17 @@ export async function uninstallCommand(
     });
   }
   const releaseId = parseReleaseId(required(args[1], "RELEASE_ID_REQUIRED"));
+  const skillRoot = `${home}/.agentpaykit/skills/${name}/${releaseId}`;
+  const removed = await lstat(skillRoot).then(
+    () => true,
+    (error: NodeJS.ErrnoException) => {
+      if (error.code === "ENOENT") return false;
+      throw error;
+    },
+  );
   await uninstallSkill({ home, name, releaseId });
   return {
-    removed: true,
+    removed,
     name,
     releaseId,
     clientPreserved: `${home}/.agentpaykit/client/0.1.0/agentpay`,

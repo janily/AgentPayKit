@@ -36,6 +36,8 @@ function runtimePublicKey(value: string): Uint8Array {
 }
 
 export class StrictReleaseVerifier {
+  constructor(private readonly now: () => Date = () => new Date()) {}
+
   async verify(skill: InstalledSkill): Promise<VerifiedInstalledSkill> {
     let digestMatches = false;
     try {
@@ -50,7 +52,7 @@ export class StrictReleaseVerifier {
       throw new ClientContractError("PACKAGE_DIGEST_MISMATCH");
     }
     try {
-      await verifyRelease(skill.release);
+      await verifyRelease(skill.release, { now: this.now() });
     } catch (error) {
       throw new ClientContractError(
         typeof error === "object" &&

@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
 
 const env = process.env;
 
@@ -64,19 +65,50 @@ if (
 if (env.MAINNET_BUDGET_LIMIT_ATOMIC !== "20000") {
   fail("MAINNET_BUDGET_MUST_EQUAL_20000");
 }
-if (env.AGENTPAY_MAINNET_CONFIRM !== `ACCEPT MAINNET ${release.releaseId}`) {
-  fail("MAINNET_CONFIRMATION_MISMATCH");
-}
-
 const simulated = await json("artifacts/e2e-simulated.json");
 const security = await json("artifacts/security-gates.json");
 const sepolia = await json("artifacts/e2e-sepolia.json").catch(() => null);
-if (simulated.passed !== 12 || simulated.failed !== 0) {
+if (
+  simulated.passed !== 12 ||
+  simulated.failed !== 0 ||
+  !Array.isArray(simulated.results) ||
+  simulated.results.length !== 12 ||
+  simulated.results.some(
+    (result) =>
+      result.passed !== true ||
+      JSON.stringify(result.actual) !== JSON.stringify(result.expected),
+  )
+) {
   fail("SIMULATED_GATE_NOT_PASSED");
 }
-if (security.failed !== 0) fail("SECURITY_GATE_NOT_PASSED");
-if (!sepolia || sepolia.passed !== 12 || sepolia.failed !== 0) {
+if (
+  security.passed !== 8 ||
+  security.failed !== 0 ||
+  !Array.isArray(security.gates) ||
+  security.gates.length !== 8
+) {
+  fail("SECURITY_GATE_NOT_PASSED");
+}
+if (
+  !sepolia ||
+  sepolia.commit !== env.AGENTPAY_PREFLIGHT_COMMIT ||
+  sepolia.passed !== 12 ||
+  sepolia.failed !== 0 ||
+  !Array.isArray(sepolia.scenarios) ||
+  sepolia.scenarios.length !== 12
+) {
   fail("SEPOLIA_GATE_NOT_PASSED");
+}
+
+const spend = spawnSync(
+  process.execPath,
+  ["packages/cli/dist/index.js", "spend", "--json"],
+  { encoding: "utf8", env: { ...env, AGENTPAYKIT_HOME: env.AGENTPAYKIT_HOME } },
+);
+if (spend.status !== 0) fail("CLIENT_BUDGET_UNREADABLE");
+const spendOutput = JSON.parse(spend.stdout);
+if (spendOutput?.data?.limit !== "20000") {
+  fail("CLIENT_BUDGET_MUST_EQUAL_20000");
 }
 
 for (const wallet of [codexWallet, claudeWallet]) {
@@ -96,7 +128,7 @@ process.stdout.write(
     network: release.network,
     amount: release.amount,
     budgetLimit: env.MAINNET_BUDGET_LIMIT_ATOMIC,
-    wallets: [codexWallet, claudeWallet],
+    walletCount: 2,
     broadcast: false,
   })}\n`,
 );
