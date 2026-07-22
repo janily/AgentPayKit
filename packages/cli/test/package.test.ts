@@ -59,6 +59,7 @@ describe("published CLI package", () => {
     ) as { private?: boolean; dependencies?: Record<string, string> };
     expect(installedManifest.private).not.toBe(true);
     expect(installedManifest.dependencies).toEqual({
+      "@agentpaykit/client-core": "0.1.0",
       "@metamask/connect-evm": "2.1.1",
       "@x402/core": "2.19.0",
       "@x402/evm": "2.19.0",

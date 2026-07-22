@@ -13,10 +13,14 @@
     "agentpay": "./dist/index.js"
   },
   "scripts": {
+    "prebuild": "pnpm --filter @agentpaykit/client-core build",
     "build": "node scripts/clean.mjs && tsc -p tsconfig.json && node scripts/build.mjs",
     "prepack": "pnpm run build",
+    "pretest": "pnpm --filter @agentpaykit/client-core build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "pretypecheck": "pnpm --filter @agentpaykit/client-core build",
     "lint": "tsc -p tsconfig.json --noEmit",
+    "prelint": "pnpm --filter @agentpaykit/client-core build",
     "test": "vitest run --passWithNoTests"
   },
   "devDependencies": {
@@ -28,6 +32,7 @@
     "vitest": "2.1.9"
   },
   "dependencies": {
+    "@agentpaykit/client-core": "workspace:*",
     "@metamask/connect-evm": "2.1.1",
     "@x402/core": "2.19.0",
     "@x402/evm": "2.19.0",

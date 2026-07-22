@@ -6,6 +6,7 @@ const MAX_TIMEOUT_MS = 45_000;
 export const MAX_PAID_SKILL_REQUEST_BYTES = 32 * 1024;
 const TESTNET_FACILITATOR = "https://x402.org/facilitator";
 const KEBAB_CASE_NAME = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
+const SEMVER = /^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/;
 const EVM_ADDRESS = /^0x[0-9a-fA-F]{40}$/;
 const ZERO_ADDRESS = /^0x0{40}$/i;
 
@@ -21,6 +22,7 @@ export interface Schema<T> {
 
 export interface PaidSkillConfig<TInput, TOutput> {
   name: string;
+  version?: string;
   description: string;
   endpointPath: "/api/invoke";
   price: string;
@@ -37,6 +39,7 @@ export interface PaidSkillConfig<TInput, TOutput> {
 
 export type DefinedPaidSkill<TInput, TOutput> = Readonly<
   PaidSkillConfig<TInput, TOutput> & {
+    version: string;
     facilitatorUrl: string;
     timeoutMs: number;
   }
@@ -50,6 +53,8 @@ export function validatePaidSkillConfig(config: unknown): void {
   if (
     typeof config.name !== "string" ||
     !KEBAB_CASE_NAME.test(config.name) ||
+    (config.version !== undefined &&
+      (typeof config.version !== "string" || !SEMVER.test(config.version))) ||
     typeof config.description !== "string" ||
     config.description.trim() === "" ||
     config.endpointPath !== "/api/invoke" ||
@@ -100,10 +105,12 @@ export function definePaidSkill<TInput, TOutput>(
 
   const facilitatorUrl = config.facilitatorUrl ?? TESTNET_FACILITATOR;
   const defined: PaidSkillConfig<TInput, TOutput> & {
+    version: string;
     facilitatorUrl: string;
     timeoutMs: number;
   } = {
     ...config,
+    version: config.version ?? "0.1.0",
     facilitatorUrl,
     timeoutMs: config.timeoutMs ?? DEFAULT_TIMEOUT_MS,
   };

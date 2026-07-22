@@ -5,6 +5,10 @@ import { join } from "node:path";
 import { encodePaymentRequiredHeader } from "@x402/core/http";
 import type { PaymentRequired } from "@x402/core/types";
 import { getDefaultAsset } from "@x402/evm";
+import {
+  buildPaidSkillDescriptor,
+  canonicalDescriptorJson,
+} from "@agentpaykit/server";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("../agentpay.skill.js", async () => {
@@ -86,6 +90,19 @@ function challengeResponse(challenge = paymentRequired()): Response {
   });
 }
 
+function descriptorResponse(): Response {
+  return Response.json(buildPaidSkillDescriptor(skill, { origin: ORIGIN }));
+}
+
+function deploymentFetch(challenge = paymentRequired()) {
+  return vi.fn<typeof globalThis.fetch>(async (input) => {
+    const pathname = new URL(String(input)).pathname;
+    return pathname === "/.well-known/agentpay-skill.json"
+      ? descriptorResponse()
+      : challengeResponse(challenge);
+  });
+}
+
 function successfulRun(stdout = ORIGIN) {
   return vi.fn<Run>(async (argv) => (argv[0] === "vercel" ? stdout : ""));
 }
@@ -94,9 +111,7 @@ describe("deploySkill", () => {
   it("checks, deploys once, verifies the quote, then writes SKILL.md", async () => {
     const cwd = await mkdtemp(join(tmpdir(), "agentpaykit-deploy-"));
     const run = successfulRun();
-    const fetch = vi.fn<typeof globalThis.fetch>(async () =>
-      challengeResponse(),
-    );
+    const fetch = deploymentFetch();
 
     await expect(deploySkill({ run, fetch, cwd })).resolves.toEqual({
       origin: ORIGIN,
@@ -112,8 +127,13 @@ describe("deploySkill", () => {
     expect(
       run.mock.calls.filter(([argv]) => argv[0] === "vercel"),
     ).toHaveLength(1);
-    expect(fetch).toHaveBeenCalledTimes(1);
-    expect(fetch).toHaveBeenCalledWith(ENDPOINT, {
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(fetch).toHaveBeenNthCalledWith(
+      1,
+      `${ORIGIN}/.well-known/agentpay-skill.json`,
+      { method: "GET", redirect: "manual" },
+    );
+    expect(fetch).toHaveBeenNthCalledWith(2, ENDPOINT, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
@@ -123,6 +143,11 @@ describe("deploySkill", () => {
     await expect(
       readFile(join(cwd, "skill", "SKILL.md"), "utf8"),
     ).resolves.toContain(`agentpay call ${ENDPOINT}`);
+    await expect(
+      readFile(join(cwd, "skill", "paid-skill.json"), "utf8"),
+    ).resolves.toBe(
+      `${canonicalDescriptorJson(buildPaidSkillDescriptor(skill, { origin: ORIGIN }))}\n`,
+    );
   });
 
   it.each([
@@ -202,9 +227,7 @@ describe("deploySkill", () => {
     async (_field, challenge) => {
       const cwd = await mkdtemp(join(tmpdir(), "agentpaykit-deploy-"));
       const run = successfulRun();
-      const fetch = vi.fn<typeof globalThis.fetch>(async () =>
-        challengeResponse(challenge),
-      );
+      const fetch = deploymentFetch(challenge);
 
       const error = await deploySkill({ run, fetch, cwd }).catch(
         (reason: unknown) => reason,
@@ -219,8 +242,35 @@ describe("deploySkill", () => {
         run.mock.calls.filter(([argv]) => argv[0] === "vercel"),
       ).toHaveLength(1);
       await expect(access(join(cwd, "skill", "SKILL.md"))).rejects.toThrow();
+      await expect(
+        access(join(cwd, "skill", "paid-skill.json")),
+      ).rejects.toThrow();
     },
   );
+
+  it("does not publish files when the live descriptor drifts from config", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "agentpaykit-deploy-"));
+    const run = successfulRun();
+    const fetch = vi.fn<typeof globalThis.fetch>(async (input) => {
+      const pathname = new URL(String(input)).pathname;
+      if (pathname === "/.well-known/agentpay-skill.json") {
+        return Response.json({
+          ...buildPaidSkillDescriptor(skill, { origin: ORIGIN }),
+          price: { amount: "0.06", atomicAmount: "60000", currency: "USDC" },
+        });
+      }
+      return challengeResponse();
+    });
+
+    await expect(deploySkill({ run, fetch, cwd })).rejects.toThrow(
+      "DEPLOYED_QUOTE_MISMATCH",
+    );
+    expect(fetch).toHaveBeenCalledTimes(1);
+    await expect(access(join(cwd, "skill", "SKILL.md"))).rejects.toThrow();
+    await expect(
+      access(join(cwd, "skill", "paid-skill.json")),
+    ).rejects.toThrow();
+  });
 
   it.each([
     ["a non-402 response", new Response(null, { status: 500 })],
@@ -244,7 +294,12 @@ describe("deploySkill", () => {
   ])("does not publish SKILL.md for %s", async (_case, response) => {
     const cwd = await mkdtemp(join(tmpdir(), "agentpaykit-deploy-"));
     const run = successfulRun();
-    const fetch = vi.fn<typeof globalThis.fetch>(async () => response);
+    const fetch = vi.fn<typeof globalThis.fetch>(async (input) => {
+      const pathname = new URL(String(input)).pathname;
+      return pathname === "/.well-known/agentpay-skill.json"
+        ? descriptorResponse()
+        : response;
+    });
 
     await expect(deploySkill({ run, fetch, cwd })).rejects.toThrow(
       "DEPLOYED_QUOTE_MISMATCH",

@@ -66,6 +66,7 @@ const legacyCliPaths = [
 ] as const;
 
 const liveWorkspaces = [
+  "packages/client-core",
   "packages/cli",
   "packages/server",
   "packages/create-agentpay-skill",

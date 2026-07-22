@@ -10,6 +10,10 @@ import {
   type SupportedNetwork,
 } from "./config.js";
 import { executePaidSkill, PaidSkillExecutionError } from "./execute.js";
+import {
+  buildPaidSkillDescriptor,
+  canonicalDescriptorJson,
+} from "./descriptor.js";
 
 const MAX_RESULT_BYTES = 1024 * 1024;
 
@@ -76,6 +80,25 @@ export function createNextPaidSkillRoute<TInput, TOutput>(
         skill,
       );
       return validationError ?? paid(request);
+    },
+  };
+}
+
+export function createNextPaidSkillDescriptorRoute<TInput, TOutput>(
+  skill: DefinedPaidSkill<TInput, TOutput>,
+): { GET(request: NextRequest): NextResponse } {
+  return {
+    GET(request) {
+      const descriptor = buildPaidSkillDescriptor(skill, {
+        origin: new URL(request.url).origin,
+      });
+      return new NextResponse(canonicalDescriptorJson(descriptor), {
+        status: 200,
+        headers: {
+          "content-type": "application/json; charset=utf-8",
+          "cache-control": "public, max-age=300, immutable",
+        },
+      });
     },
   };
 }

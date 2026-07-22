@@ -323,6 +323,7 @@ export async function assertCleanBuild({
     const pnpm = await resolvePnpm(process.env);
     const env = {
       ...process.env,
+      CI: "true",
       [marker]: "1",
     };
     delete env.NODE_PATH;

@@ -18,6 +18,7 @@ const TEMPLATE_FILES = [
   ".gitignore",
   "README.md",
   "agentpay.skill.ts",
+  "app/.well-known/agentpay-skill.json/route.ts",
   "app/api/invoke/route.ts",
   "next.config.ts",
   "package.json",

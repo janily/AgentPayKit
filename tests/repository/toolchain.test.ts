@@ -10,6 +10,7 @@ const repositoryRoot = resolve(
 
 const packageManifestPaths = [
   "package.json",
+  "packages/client-core/package.json",
   "packages/cli/package.json",
   "packages/server/package.json",
   "packages/create-agentpay-skill/package.json",
@@ -58,6 +59,7 @@ test("uses the current Node and pnpm toolchain without Bun", async () => {
     .map((line) => line.slice(2));
 
   expect(workspacePackages).toEqual([
+    "packages/client-core",
     "packages/cli",
     "packages/server",
     "packages/create-agentpay-skill",

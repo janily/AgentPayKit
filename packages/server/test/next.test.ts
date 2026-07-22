@@ -18,7 +18,11 @@ import {
   type PaidSkillConfig,
   type Schema,
 } from "../src/config";
-import { createNextPaidSkillRoute } from "../src/next";
+import { buildPaidSkillDescriptor, canonicalDescriptorJson } from "../src";
+import {
+  createNextPaidSkillDescriptorRoute,
+  createNextPaidSkillRoute,
+} from "../src/next";
 
 interface Input {
   repository: string;
@@ -193,6 +197,25 @@ describe("createNextPaidSkillRoute", () => {
     });
     expect(vi.mocked(withX402).mock.calls[0][2]).toBeInstanceOf(
       x402ResourceServer,
+    );
+  });
+
+  it("serves the canonical paid skill descriptor from the well-known route", async () => {
+    const skill = createSkill({ version: "1.0.0" });
+    const { GET } = createNextPaidSkillDescriptorRoute(skill);
+
+    const response = GET(
+      new NextRequest("https://skill.example/.well-known/agentpay-skill.json"),
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe(
+      "application/json; charset=utf-8",
+    );
+    await expect(response.text()).resolves.toBe(
+      canonicalDescriptorJson(
+        buildPaidSkillDescriptor(skill, { origin: "https://skill.example" }),
+      ),
     );
   });
 

@@ -2,11 +2,15 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { decodePaymentRequiredHeader } from "@x402/core/http";
-import { getDefaultAsset } from "@x402/evm";
 import {
+  buildPaidSkillDescriptor,
+  canonicalDescriptorJson,
+  descriptorPath,
   renderSkillMarkdown,
-  usdcToAtomic,
   validatePaidSkillConfig,
+  verifyDescriptorIntegrity,
+  verifyDescriptorMatchesChallenge,
+  type PaidSkillDescriptor,
 } from "@agentpaykit/server";
 
 import skill from "../../agentpay.skill.js";
@@ -41,10 +45,18 @@ export async function deploySkill({
 
   const origin = parseVercelOrigin(deploymentOutput);
   const endpoint = `${origin}${skill.endpointPath}`;
-  await verifyDeployedQuote({ fetch, endpoint, origin });
+  const descriptor = await verifyDeployedPublication({
+    fetch,
+    endpoint,
+    origin,
+  });
 
   const skillDirectory = join(cwd, "skill");
   await mkdir(skillDirectory, { recursive: true });
+  await writeFile(
+    join(skillDirectory, "paid-skill.json"),
+    `${canonicalDescriptorJson(descriptor)}\n`,
+  );
   await writeFile(
     join(skillDirectory, "SKILL.md"),
     renderSkillMarkdown(skill, { origin }),
@@ -80,7 +92,7 @@ function parseVercelOrigin(stdout: string): string {
   return url.origin;
 }
 
-async function verifyDeployedQuote({
+async function verifyDeployedPublication({
   fetch,
   endpoint,
   origin,
@@ -88,7 +100,9 @@ async function verifyDeployedQuote({
   fetch: typeof globalThis.fetch;
   endpoint: string;
   origin: string;
-}): Promise<void> {
+}): Promise<PaidSkillDescriptor> {
+  const descriptor = await verifyDeployedDescriptor({ fetch, origin });
+
   let response: Response;
   try {
     response = await fetch(endpoint, {
@@ -119,38 +133,56 @@ async function verifyDeployedQuote({
     throw quoteMismatch(origin, "PAYMENT-REQUIRED header is malformed");
   }
 
-  if (
-    !isRecord(challenge) ||
-    !isRecord(challenge.resource) ||
-    !Array.isArray(challenge.accepts)
-  ) {
-    throw quoteMismatch(origin, "PAYMENT-REQUIRED header is malformed");
+  try {
+    verifyDescriptorMatchesChallenge(descriptor, challenge);
+  } catch {
+    throw quoteMismatch(origin, "live payment terms do not match descriptor");
   }
 
-  const requirement = challenge.accepts[0];
-  const expectedNetwork =
-    skill.network === "base-sepolia" ? "eip155:84532" : "eip155:8453";
-  const expectedAmount = usdcToAtomic(skill.price).toString();
-  const expectedAsset = getDefaultAsset(expectedNetwork).address.toLowerCase();
-
-  if (
-    challenge.x402Version !== 2 ||
-    challenge.resource.url !== endpoint ||
-    challenge.accepts.length !== 1 ||
-    !isRecord(requirement) ||
-    requirement.scheme !== "exact" ||
-    requirement.network !== expectedNetwork ||
-    typeof requirement.asset !== "string" ||
-    requirement.asset.toLowerCase() !== expectedAsset ||
-    requirement.amount !== expectedAmount ||
-    requirement.payTo !== skill.payTo
-  ) {
-    throw quoteMismatch(origin, "live payment terms do not match config");
-  }
+  return descriptor;
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
+async function verifyDeployedDescriptor({
+  fetch,
+  origin,
+}: {
+  fetch: typeof globalThis.fetch;
+  origin: string;
+}): Promise<PaidSkillDescriptor> {
+  const descriptorUrl = `${origin}${descriptorPath()}`;
+  let response: Response;
+  try {
+    response = await fetch(descriptorUrl, {
+      method: "GET",
+      redirect: "manual",
+    });
+  } catch {
+    throw quoteMismatch(origin, "descriptor probe failed");
+  }
+
+  if (response.status !== 200) {
+    throw quoteMismatch(
+      origin,
+      `expected descriptor HTTP 200, received ${response.status}`,
+    );
+  }
+
+  let descriptor: PaidSkillDescriptor;
+  try {
+    descriptor = (await response.json()) as PaidSkillDescriptor;
+    verifyDescriptorIntegrity(descriptor);
+  } catch {
+    throw quoteMismatch(origin, "descriptor is malformed");
+  }
+
+  const expected = buildPaidSkillDescriptor(skill, { origin });
+  if (
+    canonicalDescriptorJson(descriptor) !== canonicalDescriptorJson(expected)
+  ) {
+    throw quoteMismatch(origin, "live descriptor does not match config");
+  }
+
+  return descriptor;
 }
 
 function quoteMismatch(origin: string, reason: string): Error {

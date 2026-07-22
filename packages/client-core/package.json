@@ -1,0 +1,33 @@
+{
+  "name": "@agentpaykit/client-core",
+  "version": "0.1.0",
+  "description": "Platform-neutral x402 paid Skill call core",
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepack": "pnpm run build",
+    "test": "vitest run",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@x402/core": "2.19.0",
+    "@x402/evm": "2.19.0",
+    "viem": "2.55.2"
+  },
+  "devDependencies": {
+    "@agentpaykit/tsconfig": "workspace:*",
+    "@types/node": "24.13.3",
+    "typescript": "5.9.3",
+    "vitest": "2.1.9"
+  }
+}
