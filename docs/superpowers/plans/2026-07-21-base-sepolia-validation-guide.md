@@ -6,7 +6,7 @@
 
 **Architecture:** 指南按“无广播准备 → 真实环境交叉核对 → 显式启用 Gate → 链上和签名证据验收 → 保守重跑与脱敏提交”组织。指南只调用仓库已有脚本和测试，不新增钱包签名实现，也不覆盖 Base Mainnet 或第三方验收。
 
-**Tech Stack:** Markdown、Bash、Node.js 22、pnpm 9.15.9、Vitest、Cloudflare Workers、CDP Facilitator、Base Sepolia JSON-RPC。
+**Tech Stack:** Markdown、Bash、当前稳定版 Node.js 和 pnpm、Vitest、Cloudflare Workers、CDP Facilitator、Base Sepolia JSON-RPC。
 
 ## Global Constraints
 

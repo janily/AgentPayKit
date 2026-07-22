@@ -19,20 +19,6 @@ out/
 *.log
 *.tsbuildinfo
 
-# Blockchain / Hardhat
-broadcast/
-cache/
-artifacts/
-!artifacts/
-artifacts/*
-!artifacts/e2e-sepolia.json
-!artifacts/e2e-simulated.json
-!artifacts/release-evidence.json
-!artifacts/security-gates.json
-typechain-types/
-deployments/
-ignition/deployments/
-
 # Coverage
 coverage/
 *.lcov

@@ -1,6 +1,0 @@
-{
-  "name": "{{skillName}}-mainnet",
-  "main": "src/handler.ts",
-  "compatibility_date": "2026-07-19",
-  "vars": { "AGENTPAY_ENVIRONMENT": "mainnet" },
-}

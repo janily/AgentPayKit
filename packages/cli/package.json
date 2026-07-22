@@ -1,30 +1,37 @@
 {
   "name": "@agentpaykit/cli",
   "version": "0.1.0",
-  "private": true,
+  "description": "Safely call synchronous x402 paid Skills from developer agents",
+  "license": "MIT",
   "type": "module",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "bin": {
     "agentpay": "./dist/index.js"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json && node scripts/build.mjs",
+    "build": "node scripts/clean.mjs && tsc -p tsconfig.json && node scripts/build.mjs",
+    "prepack": "pnpm run build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --passWithNoTests"
   },
   "devDependencies": {
     "@agentpaykit/tsconfig": "workspace:*",
+    "@types/node": "24.13.3",
+    "@types/qrcode-terminal": "0.12.2",
     "esbuild": "0.25.12",
-    "typescript": "^5.6.3",
-    "vitest": "^2.1.9"
+    "typescript": "5.9.3",
+    "vitest": "2.1.9"
   },
   "dependencies": {
-    "@agentpaykit/browser-bridge": "workspace:^",
-    "@agentpaykit/client": "workspace:^",
-    "@agentpaykit/installer": "workspace:^",
-    "@agentpaykit/observability": "workspace:^",
-    "@agentpaykit/publisher": "workspace:^",
-    "@agentpaykit/protocol": "workspace:^",
+    "@metamask/connect-evm": "2.1.1",
+    "@x402/core": "2.19.0",
+    "@x402/evm": "2.19.0",
+    "qrcode-terminal": "0.12.0",
     "viem": "2.55.2"
   }
 }

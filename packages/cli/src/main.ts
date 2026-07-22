@@ -1,165 +1,53 @@
-import type { InstalledSkill } from "@agentpaykit/client";
-
-import { createCommand } from "./commands/create";
-import { doctorCommand } from "./commands/doctor";
-import { installCommand } from "./commands/install";
-import { invokeCommand } from "./commands/invoke";
-import { payInsightCommand } from "./commands/payinsight";
-import { receiptsCommand } from "./commands/receipts";
-import { releaseCommand } from "./commands/release";
-import { resumeCommand } from "./commands/resume";
-import type { SpendSummary } from "./commands/spend";
-import { spendCommand } from "./commands/spend";
-import { statusCommand } from "./commands/status";
-import { uninstallCommand } from "./commands/uninstall";
-import {
-  errorOutput,
-  humanError,
-  successOutput,
-  type CliCommand,
-} from "./output";
+import type { CallDependencies } from "./call";
+import { callCommand } from "./commands/call";
+import { doctorCommand, type DoctorResult } from "./commands/doctor";
+import { walletCommand } from "./commands/wallet";
+import { CliError } from "./errors";
+import { errorOutput, humanError, humanSuccess, successOutput } from "./output";
 
 export interface CliDependencies {
-  platform: NodeJS.Platform;
-  client: {
-    invoke(skill: InstalledSkill, input: unknown): Promise<unknown>;
-    status(id: string): Promise<unknown>;
-    resume(id: string): Promise<unknown>;
-  };
-  loadSkill(path: string): Promise<InstalledSkill>;
-  spend(): Promise<SpendSummary>;
-  receipts(): Promise<unknown>;
-  payInsight(filter: { releaseId?: string; status?: string }): Promise<unknown>;
+  call: CallDependencies;
+  doctor(): Promise<DoctorResult>;
+  disconnectWallet(): Promise<void>;
   writeStdout(line: string): void;
   writeStderr(line: string): void;
-  signals?: {
-    on(signal: "SIGINT", handler: () => void): void;
-    off(signal: "SIGINT", handler: () => void): void;
-  };
-}
-
-function commandName(value: string | undefined): CliCommand {
-  return value === "invoke" ||
-    value === "status" ||
-    value === "resume" ||
-    value === "spend" ||
-    value === "create" ||
-    value === "install" ||
-    value === "uninstall" ||
-    value === "doctor" ||
-    value === "release" ||
-    value === "receipts" ||
-    value === "publisher"
-    ? value
-    : "unknown";
-}
-
-function humanSuccess(command: CliCommand, data: unknown): string {
-  const value = data as Record<string, unknown>;
-  switch (command) {
-    case "invoke":
-      return `Invocation ${String(value.invocationId)} is ${String(value.status)} (${String(value.chargeState)})\nResume: ${String(value.resumeCommand)}`;
-    case "status":
-      return `Invocation ${String(value.invocationId)} is ${String(value.status)} (${String(value.chargeState)})`;
-    case "resume":
-      return JSON.stringify(value.result, null, 2);
-    case "spend":
-      return `Daily spend ${String(value.spent)}; held ${String(value.held)}; available ${String(value.available)} of ${String(value.limit)}`;
-    case "create":
-      return `Created paid skill at ${String(value.path)}`;
-    case "install":
-      return `Installed skill at ${String(value.skillRoot)} for Codex and Claude Code`;
-    case "uninstall":
-      return `Removed ${String(value.name)} ${String(value.releaseId)}; shared client preserved`;
-    case "doctor":
-      return `Installation healthy: ${String(value.name)} ${String(value.releaseId)}`;
-    case "release":
-      return JSON.stringify(value, null, 2);
-    case "receipts":
-    case "publisher":
-      return JSON.stringify(value, null, 2);
-    default:
-      return "";
-  }
 }
 
 export async function runCli(
   argv: string[],
   dependencies: CliDependencies,
 ): Promise<number> {
-  const command = commandName(argv[0]);
-  const args = argv.slice(1).filter((argument) => argument !== "--json");
-  const json = argv.includes("--json");
-  let interrupted = false;
-  const interrupt = () => {
-    interrupted = true;
-  };
-  if (command === "invoke") dependencies.signals?.on("SIGINT", interrupt);
+  const command = argv[0];
+  let json = argv.includes("--json");
   try {
-    if (dependencies.platform !== "darwin") {
-      throw Object.assign(new Error("UNSUPPORTED_PLATFORM"), {
-        code: "UNSUPPORTED_PLATFORM",
-        chargeState: "NOT_CHARGED",
-      });
+    if (command !== "call" && command !== "doctor" && command !== "wallet") {
+      throw new CliError("UNKNOWN_COMMAND", "not-charged");
     }
-    if (command === "unknown") {
-      throw Object.assign(new Error("USAGE"), { code: "USAGE" });
-    }
-    const data =
-      command === "create"
-        ? await createCommand(args)
-        : command === "install"
-          ? await installCommand(args)
-          : command === "uninstall"
-            ? await uninstallCommand(args)
-            : command === "doctor"
-              ? await doctorCommand(args)
-              : command === "release"
-                ? await releaseCommand(args)
-                : command === "receipts"
-                  ? await receiptsCommand(dependencies.receipts)
-                  : command === "publisher"
-                    ? args[0] === "payinsight"
-                      ? await payInsightCommand(
-                          args.slice(1),
-                          dependencies.payInsight,
-                        )
-                      : Promise.reject(
-                          Object.assign(
-                            new Error("PUBLISHER_COMMAND_REQUIRED"),
-                            {
-                              code: "PUBLISHER_COMMAND_REQUIRED",
-                            },
-                          ),
-                        )
-                    : command === "invoke"
-                      ? await invokeCommand(args, dependencies)
-                      : command === "status"
-                        ? await statusCommand(args, dependencies.client)
-                        : command === "resume"
-                          ? await resumeCommand(args, dependencies.client)
-                          : await spendCommand(dependencies.spend);
-    if (interrupted && command === "invoke") {
-      const invocation = data as Record<string, unknown>;
-      throw Object.assign(new Error("INTERRUPTED"), {
-        code: "INTERRUPTED",
-        chargeState: invocation.chargeState,
-        handle: { invocationId: invocation.invocationId },
-      });
-    }
+    const executed =
+      command === "call"
+        ? await callCommand(argv.slice(1), dependencies.call)
+        : command === "doctor"
+          ? await doctorCommand(argv.slice(1), dependencies.doctor)
+          : await walletCommand(argv.slice(1), dependencies.disconnectWallet);
+    json = executed.json;
+    const callValue =
+      command === "call"
+        ? (executed.value as { result: unknown; payment: unknown })
+        : { result: executed.value, payment: null };
     dependencies.writeStdout(
       json
-        ? JSON.stringify(successOutput(command, data))
-        : humanSuccess(command, data),
+        ? JSON.stringify(successOutput(callValue.result, callValue.payment))
+        : humanSuccess(callValue.result, callValue.payment),
     );
     return 0;
   } catch (error) {
-    const output = errorOutput(command, error);
+    const output = errorOutput(error);
     dependencies.writeStderr(
       json ? JSON.stringify(output) : humanError(output.error),
     );
-    return output.error.code === "INTERRUPTED" ? 130 : 1;
-  } finally {
-    if (command === "invoke") dependencies.signals?.off("SIGINT", interrupt);
+    return output.error.code === "UNKNOWN_COMMAND" ||
+      output.error.code === "INVALID_ARGUMENTS"
+      ? 2
+      : 1;
   }
 }

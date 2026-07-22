@@ -1,48 +1,65 @@
 # AgentPayKit
 
-AgentPayKit is a paid-skill runtime and local wallet bridge for Codex and Claude Code. It is being adapted from the pinned open-source `superposition/paybot` repository while preserving its MIT license and Git history.
+AgentPayKit is a developer-only MVP for publishing and calling synchronous,
+x402-paid Skills.
 
-The new architecture replaces the upstream prototype payment stack with:
+> **Publish:** scaffold → edit `agentpay.skill.ts` → `pnpm deploy`
+>
+> **Use:** ask your Agent → review the quoted price → confirm in MetaMask →
+> receive the result and receipt
 
-- the official x402 v2 SDK and Base USDC;
-- a Cloudflare Workers/Hono runtime with asynchronous execution;
-- a shared macOS client and CLI;
-- a loopback-only Browser Bridge for explicit MetaMask approval;
-- deterministic publisher and installer tooling for both coding agents.
+Each Endpoint has one fixed USDC price. Publishers get an officially supported
+Next.js App Router + Vercel path, while consumers use the `agentpay` CLI and
+MetaMask Mobile. No-code publishing and browser consumer flows are deferred.
+
+## Start here
+
+- [Publisher quickstart](docs/publisher-quickstart.md)
+- [Consumer quickstart](docs/consumer-quickstart.md)
+- [Architecture and trust boundaries](docs/architecture.md)
+- [MVP definition of done](docs/acceptance/mvp-dod.md)
+
+The repository includes a deterministic
+[`paid-repo-review`](examples/paid-repo-review) example. It supports official
+x402 v2 `exact` payments in Base Sepolia and Base Mainnet USDC, with synchronous
+business execution capped at 45 seconds.
 
 ## Repository layout
 
 ```text
-apps/runtime                  Cloudflare Worker entry point
-packages/browser-bridge      Local payment approval UI
-packages/protocol            Signed cross-boundary contracts
-packages/payment             Official x402 adapter
-packages/runtime             Runtime state and execution services
-packages/client              Shared macOS client
-packages/cli                 agentpay command line interface
-packages/publisher           Release and package tooling
-packages/installer           Dual-agent installer
-packages/observability       Allowlisted logs and aggregates
-packages/testkit             Deterministic payment fixtures
+packages/create-agentpay-skill  Next.js Skill project scaffolder
+packages/server                 Thin official x402 Next.js wrapper
+packages/cli                    Consumer CLI and MetaMask connection
+packages/tsconfig               Shared TypeScript configuration
+examples/paid-repo-review       End-to-end example Skill
 ```
 
-## Toolchain
+## Develop the repository
 
-Node.js 22 and pnpm 9.15.9 are pinned. With Corepack enabled:
+Use the current stable Node.js and pnpm releases. The project does not pin an
+exact version of either tool.
 
 ```bash
+npm install --global pnpm@latest
 pnpm install --frozen-lockfile
 pnpm verify
 ```
 
-The default test suite never broadcasts a transaction. Real Base Sepolia and Mainnet gates require explicit environment flags and isolated wallets.
+Automated tests never open a wallet or broadcast a transaction. Live Base
+Sepolia and Mainnet checks are separate, manual release gates.
 
-## Development plan
+## Product boundary
 
-The ordered M0–M7 implementation plans are indexed in [`docs/00-plan-index.md`](docs/00-plan-index.md). Upstream provenance and the exact adaptation boundary are recorded in [`docs/upstream/paybot-baseline.md`](docs/upstream/paybot-baseline.md).
+The compatible server contract settles only after a successful, valid result.
+The CLI validates the quote before wallet access, but it cannot
+cryptographically force a malicious seller to provide a useful result or honor
+failure-no-charge. Use only endpoints you trust.
 
-Release acceptance is fail-closed. The [MVP evidence map](docs/acceptance/mvp-dod.md) distinguishes automated local coverage from the still-required real Sepolia, controlled Mainnet and independent 30-minute gates.
+Hosted execution, dynamic/token/time pricing, asynchronous jobs, subscriptions,
+a registry or store, automatic payment recovery, no-code creation, and browser
+or React consumption are outside this MVP.
 
 ## License
 
-The original MIT license is preserved in [`LICENSE`](LICENSE).
+The original MIT license and upstream ancestry are preserved. See
+[`LICENSE`](LICENSE) and the [provenance record](docs/upstream/paybot-baseline.md).
