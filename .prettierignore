@@ -1,3 +1,1 @@
-packages/browser-bridge/dist-lib/
-packages/browser-bridge/playwright-report/
-packages/browser-bridge/test-results/
+.superpowers/

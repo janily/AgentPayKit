@@ -1,27 +1,35 @@
 import { describe, expect, test } from "vitest";
 
-import { errorOutput, successOutput } from "../src/output";
+import { CliError } from "../src/errors";
+import { errorOutput, humanError, successOutput } from "../src/output";
 
 describe("CLI output", () => {
-  test("serializes stable success and error envelopes", () => {
-    expect(successOutput("spend", { spent: "10" })).toEqual({
-      schemaVersion: "1",
+  test("uses the exact minimal success and failure envelopes", () => {
+    expect(successOutput({ answer: 42 }, null)).toEqual({
       ok: true,
-      command: "spend",
-      data: { spent: "10" },
+      result: { answer: 42 },
+      payment: null,
     });
-    expect(errorOutput("resume", new Error("boom"))).toEqual({
-      schemaVersion: "1",
+    expect(
+      errorOutput(new CliError("PAYMENT_REJECTED", "not-charged")),
+    ).toEqual({
       ok: false,
-      command: "resume",
       error: {
-        code: "UNEXPECTED_ERROR",
-        message: "boom",
-        chargeState: "SETTLEMENT_UNKNOWN",
+        code: "PAYMENT_REJECTED",
+        message: "PAYMENT_REJECTED",
+        paymentState: "not-charged",
       },
     });
-    expect(errorOutput("spend", new Error("missing policy"))).toMatchObject({
-      error: { chargeState: "NOT_CHARGED" },
-    });
+  });
+
+  test("sanitizes attacker-controlled errors and warns against unknown retries", () => {
+    expect(
+      JSON.stringify(errorOutput(new Error("secret response body"))),
+    ).not.toContain("secret");
+    expect(
+      humanError(
+        errorOutput(new CliError("PAYMENT_STATE_UNKNOWN", "unknown")).error,
+      ),
+    ).toContain("do not retry without user confirmation");
   });
 });

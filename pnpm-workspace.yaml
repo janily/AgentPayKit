@@ -1,4 +1,12 @@
 packages:
-  - apps/*
-  - examples/*
-  - packages/*
+  - packages/cli
+  - packages/server
+  - packages/create-agentpay-skill
+  - packages/tsconfig
+  - examples/paid-repo-review
+linkWorkspacePackages: true
+allowBuilds:
+  esbuild: true
+  protobufjs: true
+  sharp: true
+  workerd: true

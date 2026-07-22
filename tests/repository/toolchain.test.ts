@@ -10,38 +10,38 @@ const repositoryRoot = resolve(
 
 const packageManifestPaths = [
   "package.json",
-  "apps/runtime/package.json",
-  "packages/browser-bridge/package.json",
   "packages/cli/package.json",
-  "packages/client/package.json",
-  "packages/installer/package.json",
-  "packages/observability/package.json",
-  "packages/payment/package.json",
-  "packages/protocol/package.json",
-  "packages/publisher/package.json",
-  "packages/runtime/package.json",
-  "packages/testkit/package.json",
+  "packages/server/package.json",
+  "packages/create-agentpay-skill/package.json",
   "packages/tsconfig/package.json",
+  "examples/paid-repo-review/package.json",
 ];
 
 const executableConfigPaths = [
-  "e2e-test.sh",
   ".github/workflows/ci.yml",
-  "packages/browser-bridge/vite.config.ts",
+  "packages/cli/scripts/build.mjs",
 ];
 
-test("pins the pnpm and Node 22 toolchain without Bun", async () => {
+test("uses the current Node and pnpm toolchain without Bun", async () => {
   const rootPackage = JSON.parse(
     await readFile(resolve(repositoryRoot, "package.json"), "utf8"),
   ) as {
     packageManager?: string;
+    devEngines?: { packageManager?: unknown };
     engines?: { node?: string };
     workspaces?: unknown;
   };
 
-  expect(rootPackage.packageManager).toBe("pnpm@9.15.9");
-  expect(rootPackage.engines?.node).toBe(">=22 <23");
+  expect(rootPackage.packageManager).toBeUndefined();
+  expect(rootPackage.devEngines?.packageManager).toBeUndefined();
+  expect(rootPackage.engines).toBeUndefined();
   expect(rootPackage.workspaces).toBeUndefined();
+  await expect(
+    access(resolve(repositoryRoot, ".nvmrc"), constants.F_OK),
+  ).rejects.toThrow();
+  await expect(
+    access(resolve(repositoryRoot, ".node-version"), constants.F_OK),
+  ).rejects.toThrow();
   await expect(
     access(resolve(repositoryRoot, "bun.lock"), constants.F_OK),
   ).rejects.toThrow();
@@ -57,21 +57,42 @@ test("pins the pnpm and Node 22 toolchain without Bun", async () => {
     .filter((line) => line.startsWith("- "))
     .map((line) => line.slice(2));
 
-  expect(workspacePackages).toEqual(["apps/*", "examples/*", "packages/*"]);
+  expect(workspacePackages).toEqual([
+    "packages/cli",
+    "packages/server",
+    "packages/create-agentpay-skill",
+    "packages/tsconfig",
+    "examples/paid-repo-review",
+  ]);
 
   for (const packageManifestPath of packageManifestPaths) {
     const packageManifest = JSON.parse(
       await readFile(resolve(repositoryRoot, packageManifestPath), "utf8"),
-    ) as { scripts?: Record<string, string> };
+    ) as {
+      scripts?: Record<string, string>;
+      dependencies?: Record<string, string>;
+      devDependencies?: Record<string, string>;
+      peerDependencies?: Record<string, string>;
+    };
 
     expect(Object.values(packageManifest.scripts ?? {})).not.toContainEqual(
       expect.stringMatching(/\b(?:bun|bunx)\b/i),
     );
+    for (const version of Object.values({
+      ...packageManifest.dependencies,
+      ...packageManifest.devDependencies,
+      ...packageManifest.peerDependencies,
+    })) {
+      expect(version).not.toMatch(/^[~^]/);
+    }
   }
 
   for (const executableConfigPath of executableConfigPaths) {
-    await expect(
-      readFile(resolve(repositoryRoot, executableConfigPath), "utf8"),
-    ).resolves.not.toMatch(/\b(?:bun|bunx)\b/i);
+    const executableConfig = await readFile(
+      resolve(repositoryRoot, executableConfigPath),
+      "utf8",
+    );
+    expect(executableConfig).not.toMatch(/\b(?:bun|bunx)\b/i);
+    expect(executableConfig).not.toMatch(/\bnode\d+\b/i);
   }
 });
