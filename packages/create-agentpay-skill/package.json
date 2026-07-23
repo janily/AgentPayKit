@@ -1,13 +1,35 @@
 {
   "name": "create-agentpay-skill",
-  "version": "0.1.0",
+  "version": "0.1.0-alpha.1",
+  "description": "Create a Base Sepolia AgentPayKit paid Skill project",
+  "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agentpaykit/agentpaykit.git",
+    "directory": "packages/create-agentpay-skill"
+  },
+  "homepage": "https://github.com/agentpaykit/agentpaykit#readme",
+  "bugs": {
+    "url": "https://github.com/agentpaykit/agentpaykit/issues"
+  },
+  "keywords": [
+    "agentpay",
+    "agentpaykit",
+    "create-agentpay-skill",
+    "x402",
+    "base-sepolia",
+    "usdc",
+    "scaffold"
+  ],
   "bin": {
     "create-agentpay-skill": "./dist/cli.js"
   },
   "files": [
     "dist",
-    "template"
+    "template",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json && chmod +x dist/cli.js",
@@ -17,7 +39,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
-    "@agentpaykit/server": "workspace:*",
+    "@agentpaykit/server": "0.1.0-alpha.1",
     "@types/node": "24.13.3",
     "@x402/core": "2.19.0",
     "@x402/evm": "2.19.0",

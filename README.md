@@ -1,7 +1,10 @@
 # AgentPayKit
 
-AgentPayKit is a developer-only MVP for publishing and calling synchronous,
-x402-paid Skills.
+Developer Preview / Base Sepolia only / Not audited / Do not use high-value
+wallets.
+
+AgentPayKit is a Developer Preview for publishing and calling synchronous,
+x402-paid Skills on Base Sepolia.
 
 > **Publish:** scaffold → edit `agentpay.skill.ts` → `pnpm deploy`
 >
@@ -21,8 +24,8 @@ MetaMask Mobile. No-code publishing and browser consumer flows are deferred.
 
 The repository includes a deterministic
 [`paid-repo-review`](examples/paid-repo-review) example. It supports official
-x402 v2 `exact` payments in Base Sepolia and Base Mainnet USDC, with synchronous
-business execution capped at 45 seconds.
+x402 v2 `exact` payments in Base Sepolia USDC, with synchronous business
+execution capped at 45 seconds.
 
 ## Repository layout
 
@@ -56,8 +59,8 @@ cryptographically force a malicious seller to provide a useful result or honor
 failure-no-charge. Use only endpoints you trust.
 
 Hosted execution, dynamic/token/time pricing, asynchronous jobs, subscriptions,
-a registry or store, automatic payment recovery, no-code creation, and browser
-or React consumption are outside this MVP.
+a registry or store, automatic payment recovery, no-code creation, browser or
+React consumption, and Base Mainnet production claims are outside this preview.
 
 ## License
 

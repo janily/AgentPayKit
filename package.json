@@ -1,7 +1,7 @@
 {
   "name": "agentpaykit",
-  "version": "0.1.0",
-  "description": "Publish and call synchronous x402 paid Skills",
+  "version": "0.1.0-alpha.1",
+  "description": "Publish and call Base Sepolia synchronous x402 paid Skills",
   "private": true,
   "scripts": {
     "prebuild": "pnpm --filter @agentpaykit/server build",

@@ -1,9 +1,27 @@
 {
   "name": "@agentpaykit/cli",
-  "version": "0.1.0",
-  "description": "Safely call synchronous x402 paid Skills from developer agents",
+  "version": "0.1.0-alpha.1",
+  "description": "Safely call Base Sepolia synchronous x402 paid Skills from developer agents",
   "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agentpaykit/agentpaykit.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/agentpaykit/agentpaykit#readme",
+  "bugs": {
+    "url": "https://github.com/agentpaykit/agentpaykit/issues"
+  },
+  "keywords": [
+    "agentpay",
+    "agentpaykit",
+    "x402",
+    "base-sepolia",
+    "usdc",
+    "metamask",
+    "cli"
+  ],
   "files": [
     "dist",
     "README.md",

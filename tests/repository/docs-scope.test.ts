@@ -52,7 +52,7 @@ describe("developer-first MVP documentation", () => {
 
     expect(readme).toMatch(/Publish:.+agentpay\.skill\.ts.+pnpm deploy/is);
     expect(readme).toMatch(/Use:.+quoted price.+MetaMask.+result/is);
-    expect(readme).toMatch(/developer-only MVP/i);
+    expect(readme).toMatch(/Developer Preview/i);
     expect(readme).toMatch(
       /fixed USDC price per endpoint|each endpoint has one fixed USDC price/i,
     );
@@ -156,7 +156,7 @@ describe("developer-first MVP documentation", () => {
   it("records local Gate F completion without claiming manual release gates", async () => {
     const dod = await read("docs/acceptance/mvp-dod.md");
 
-    expect(dod).toMatch(/Status: \*\*not ready for release\*\*/i);
+    expect(dod).toMatch(/Status: \*\*Developer Preview only\*\*/i);
     expect(dod).toMatch(
       /- \[x\] A fresh final run of frozen clean installation, format, lint, typecheck,\s+tests, and build passes/is,
     );
@@ -166,7 +166,7 @@ describe("developer-first MVP documentation", () => {
     expect(dod).toMatch(/- \[ \] After Sepolia passes.+Base Mainnet/is);
     expect(dod).toMatch(/local\/reproducible.+are complete/is);
     expect(dod).toMatch(
-      /Manual Base Sepolia evidence, Base Mainnet evidence, and final independent\s+review remain pending/is,
+      /Manual Base Sepolia evidence, Base Mainnet evidence, and final\s+independent review remain pending/is,
     );
   });
 

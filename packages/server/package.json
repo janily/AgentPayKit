@@ -1,9 +1,26 @@
 {
   "name": "@agentpaykit/server",
-  "version": "0.1.0",
-  "description": "Thin Next.js server adapter for synchronous x402 paid Skills",
+  "version": "0.1.0-alpha.1",
+  "description": "Thin Next.js server adapter for Base Sepolia synchronous x402 paid Skills",
   "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agentpaykit/agentpaykit.git",
+    "directory": "packages/server"
+  },
+  "homepage": "https://github.com/agentpaykit/agentpaykit#readme",
+  "bugs": {
+    "url": "https://github.com/agentpaykit/agentpaykit/issues"
+  },
+  "keywords": [
+    "agentpay",
+    "agentpaykit",
+    "x402",
+    "base-sepolia",
+    "usdc",
+    "nextjs"
+  ],
   "files": [
     "dist",
     "README.md",

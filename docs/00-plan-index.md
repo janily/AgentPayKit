@@ -12,13 +12,14 @@
 
 ## Authoritative documents
 
-| Document                                                                                              | Purpose                                                 | Status                               |
-| ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------ |
-| [Synchronous MVP design](superpowers/specs/2026-07-20-synchronous-paid-skill-mvp-design.md)           | Product, architecture, security and acceptance baseline | Approved                             |
-| [Developer-first implementation plan](superpowers/plans/2026-07-21-developer-first-paid-skill-mvp.md) | Ordered file-level migration plan                       | Tasks 1–13 complete; Task 14 current |
-| [Publisher quickstart](publisher-quickstart.md)                                                       | Supported scaffold/config/deploy journey                | Current                              |
-| [Consumer quickstart](consumer-quickstart.md)                                                         | CLI and MetaMask per-call journey                       | Current                              |
-| [MVP definition of done](acceptance/mvp-dod.md)                                                       | Gates A–F and evidence state                            | Gate F pending                       |
+| Document                                                                                              | Purpose                                                 | Status                                                    |
+| ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------- | --------------------------------------------------------- |
+| [Synchronous MVP design](superpowers/specs/2026-07-20-synchronous-paid-skill-mvp-design.md)           | Product, architecture, security and acceptance baseline | Approved                                                  |
+| [Developer-first implementation plan](superpowers/plans/2026-07-21-developer-first-paid-skill-mvp.md) | Ordered file-level migration plan                       | Tasks 1–13 complete; Task 14 current                      |
+| [Publisher quickstart](publisher-quickstart.md)                                                       | Supported scaffold/config/deploy journey                | Current                                                   |
+| [Consumer quickstart](consumer-quickstart.md)                                                         | CLI and MetaMask per-call journey                       | Current                                                   |
+| [External preview release guide](external-preview-release-guide.md)                                   | npm, deployment, live Sepolia, Agent, and GitHub steps  | Operator action pending                                   |
+| [MVP definition of done](acceptance/mvp-dod.md)                                                       | Gates A–F and evidence state                            | Gate F pending; Developer Preview/manual evidence pending |
 
 ## Execution state
 

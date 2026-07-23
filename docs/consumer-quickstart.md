@@ -13,10 +13,10 @@ npm install --global @agentpaykit/cli
 agentpay doctor
 ```
 
-Install MetaMask Mobile and fund the selected account with enough USDC on the
-required Base network. The first paid call displays a QR code to establish a
-wallet session. The raw connection URI is never printed or stored. A session
-may persist, but it does not authorize future payments.
+Install MetaMask Mobile and fund the selected account with enough USDC on Base
+Sepolia. The first paid call displays a QR code to establish a wallet session.
+The raw connection URI is never printed or stored. A session may persist, but
+it does not authorize future payments.
 
 ## Call a Skill
 
@@ -30,8 +30,9 @@ agentpay call https://skill.example/api/invoke \
 ```
 
 `--max-price` is required. It is a local ceiling, not the authoritative price.
-The CLI first sends an unsigned request and validates the returned x402 v2 quote:
-Endpoint, Base network, official USDC asset, exact amount, payee, and maximum.
+The CLI first sends an unsigned request and validates the returned x402 v2
+quote: Endpoint, Base Sepolia network, official USDC asset, exact amount,
+payee, and maximum.
 An invalid or over-limit quote fails before wallet access.
 
 Before signing, inspect the displayed Endpoint, network, amount, and payee. Every

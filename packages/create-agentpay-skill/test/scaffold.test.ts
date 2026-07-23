@@ -16,11 +16,13 @@ import { scaffold } from "../src/scaffold.js";
 
 const TEMPLATE_FILES = [
   ".gitignore",
+  "LICENSE",
   "README.md",
   "agentpay.skill.ts",
   "app/api/invoke/route.ts",
   "next.config.ts",
   "package.json",
+  "scripts/clean.mjs",
   "scripts/deploy.ts",
   "scripts/generate-skill.ts",
   "scripts/lib/deploy.ts",

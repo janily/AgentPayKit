@@ -1,9 +1,6 @@
 # AgentPayKit MVP definition of done
 
-Status: **not ready for release**. Gates A–E have automated repository evidence.
-Gate F's local/reproducible clean verification and final scan are complete.
-Manual Base Sepolia evidence, Base Mainnet evidence, and final independent
-review remain pending. Automated green tests do not prove a live transfer.
+Status: **Developer Preview only**. Gates A–E have automated repository evidence. Gate F's local/reproducible clean verification and final scan are complete. Manual Base Sepolia evidence, Base Mainnet evidence, and final independent review remain pending. Automated green tests do not prove a live transfer.
 
 ## Gate A — publisher core (Tasks 1–4)
 

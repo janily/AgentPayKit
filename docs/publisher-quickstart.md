@@ -19,7 +19,7 @@ publish.
 
 ```bash
 # 1. Scaffold a complete paid Skill project
-pnpm create agentpay-skill@latest my-paid-skill
+pnpm create agentpay-skill@alpha my-paid-skill
 
 # 2. Set the payment terms, schemas and execute function
 cd my-paid-skill
@@ -40,7 +40,7 @@ parts by hand.
 
 - `name` and `description`;
 - one fixed decimal-string `price` in USDC;
-- `network`: `base-sepolia` while testing, then `base` for production;
+- `network`: `base-sepolia` for this preview; Base Mainnet is out of scope;
 - the public `payTo` address;
 - `facilitatorUrl` (a production facilitator is required for Mainnet);
 - `exampleInput`, input and output schemas, `execute`, and `success`.
@@ -77,4 +77,4 @@ however, applies to the scaffolded project; other frameworks may use official
 x402 SDKs directly but are outside this MVP support boundary.
 
 Before release, follow the manual [Base Sepolia gate](runbooks/base-sepolia-mvp-gate.md).
-Mainnet remains blocked until that evidence is complete.
+Base Mainnet remains out of scope for the community preview.
