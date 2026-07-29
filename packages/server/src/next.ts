@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import { HTTPFacilitatorClient, x402ResourceServer } from "@x402/core/server";
 import { ExactEvmScheme } from "@x402/evm/exact/server";
 import { withX402 } from "@x402/next";
@@ -12,6 +14,14 @@ import {
 import { executePaidSkill, PaidSkillExecutionError } from "./execute.js";
 
 const MAX_RESULT_BYTES = 1024 * 1024;
+const MAX_RECENT_PAYMENTS = 1_000;
+
+interface ResponseSnapshot {
+  body: ArrayBuffer;
+  headers: Headers;
+  status: number;
+  statusText: string;
+}
 
 export function createNextPaidSkillRoute<TInput, TOutput>(
   skill: DefinedPaidSkill<TInput, TOutput>,
@@ -68,6 +78,8 @@ export function createNextPaidSkillRoute<TInput, TOutput>(
     },
     server,
   );
+  const inFlightPayments = new Map<string, Promise<ResponseSnapshot>>();
+  const recentPayments = new Set<string>();
 
   return {
     async POST(request) {
@@ -75,15 +87,56 @@ export function createNextPaidSkillRoute<TInput, TOutput>(
         request,
         skill,
       );
-      return validationError ?? paid(request);
+      if (validationError !== undefined) return validationError;
+
+      const signature = request.headers.get("payment-signature");
+      if (signature === null) return paid(request);
+      const key = createHash("sha256").update(signature).digest("hex");
+      if (recentPayments.has(key)) {
+        return errorResponse("PAYMENT_CREDENTIAL_REPLAYED", 409);
+      }
+      const existing = inFlightPayments.get(key);
+      if (existing !== undefined) return responseFromSnapshot(await existing);
+
+      if (recentPayments.size >= MAX_RECENT_PAYMENTS) {
+        const oldest = recentPayments.values().next().value;
+        if (oldest !== undefined) recentPayments.delete(oldest);
+      }
+      const execution = snapshotResponse(paid(request));
+      inFlightPayments.set(key, execution);
+      try {
+        const snapshot = await execution;
+        recentPayments.add(key);
+        return responseFromSnapshot(snapshot);
+      } finally {
+        inFlightPayments.delete(key);
+      }
     },
   };
 }
 
-function networkToCaip2(
-  network: SupportedNetwork,
-): "eip155:84532" | "eip155:8453" {
-  return network === "base-sepolia" ? "eip155:84532" : "eip155:8453";
+async function snapshotResponse(
+  response: Promise<Response>,
+): Promise<ResponseSnapshot> {
+  const value = await response;
+  return {
+    body: await value.arrayBuffer(),
+    headers: new Headers(value.headers),
+    status: value.status,
+    statusText: value.statusText,
+  };
+}
+
+function responseFromSnapshot(snapshot: ResponseSnapshot): Response {
+  return new Response(snapshot.body.slice(0), {
+    headers: snapshot.headers,
+    status: snapshot.status,
+    statusText: snapshot.statusText,
+  });
+}
+
+function networkToCaip2(_network: SupportedNetwork): "eip155:84532" {
+  return "eip155:84532";
 }
 
 async function validateRequestBeforePayment<TInput, TOutput>(

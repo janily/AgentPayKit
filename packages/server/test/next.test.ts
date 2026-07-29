@@ -2,16 +2,9 @@ import {
   decodePaymentRequiredHeader,
   encodePaymentSignatureHeader,
 } from "@x402/core/http";
-import { x402ResourceServer } from "@x402/core/server";
 import type { PaymentPayload } from "@x402/core/types";
-import { withX402 } from "@x402/next";
 import { NextRequest } from "next/server.js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
-vi.mock("@x402/next", async (importOriginal) => {
-  const official = await importOriginal<typeof import("@x402/next")>();
-  return { ...official, withX402: vi.fn(official.withX402) };
-});
 
 import {
   definePaidSkill,
@@ -163,37 +156,42 @@ afterEach(() => {
 });
 
 describe("createNextPaidSkillRoute", () => {
-  it("cannot replace official withX402 through an extra public argument", () => {
+  it("cannot replace official withX402 through an extra public argument", async () => {
     const replacement = vi.fn();
 
-    (createNextPaidSkillRoute as unknown as (...args: unknown[]) => unknown)(
-      createSkill(),
-      { withX402: replacement },
-    );
+    const route = (
+      createNextPaidSkillRoute as unknown as (
+        ...args: unknown[]
+      ) => ReturnType<typeof createNextPaidSkillRoute>
+    )(createSkill(), { withX402: replacement });
 
+    const response = await route.POST(jsonRequest(VALID_INPUT));
     expect(replacement).not.toHaveBeenCalled();
-    expect(withX402).toHaveBeenCalledTimes(1);
+    expect(response.status).toBe(402);
   });
 
-  it("composes the exact route config through official withX402", () => {
+  it("composes the exact route config through official withX402", async () => {
     const skill = createSkill();
+    const route = createNextPaidSkillRoute(skill);
 
-    createNextPaidSkillRoute(skill);
-
-    expect(withX402).toHaveBeenCalledTimes(1);
-    expect(vi.mocked(withX402).mock.calls[0][1]).toEqual({
-      accepts: {
-        scheme: "exact",
-        price: "$0.05",
-        network: "eip155:84532",
-        payTo: skill.payTo,
-      },
+    const response = await route.POST(jsonRequest(VALID_INPUT));
+    const challenge = decodePaymentRequiredHeader(
+      response.headers.get("payment-required")!,
+    );
+    expect(response.status).toBe(402);
+    expect(challenge.resource).toMatchObject({
+      url: "https://skill.example/api/invoke",
       description: skill.description,
       mimeType: "application/json",
     });
-    expect(vi.mocked(withX402).mock.calls[0][2]).toBeInstanceOf(
-      x402ResourceServer,
-    );
+    expect(challenge.accepts).toEqual([
+      expect.objectContaining({
+        scheme: "exact",
+        network: "eip155:84532",
+        amount: "50000",
+        payTo: skill.payTo,
+      }),
+    ]);
   });
 
   it.each([
@@ -346,5 +344,37 @@ describe("createNextPaidSkillRoute", () => {
     expect(execute).toHaveBeenCalledTimes(1);
     expect(facilitatorCalls("/verify")).toBe(1);
     expect(facilitatorCalls("/settle")).toBe(1);
+  });
+
+  it("coalesces repeated use of the same payment credential", async () => {
+    const execute = vi.fn(async () => ({ summary: "Reviewed once" }));
+    const { POST } = createNextPaidSkillRoute(createSkill({ execute }));
+    const unpaid = await POST(jsonRequest(VALID_INPUT));
+    const challenge = decodePaymentRequiredHeader(
+      unpaid.headers.get("payment-required")!,
+    );
+    if (challenge.x402Version !== 2) throw new Error("Expected x402 v2");
+    const signature = encodePaymentSignatureHeader({
+      x402Version: 2,
+      resource: challenge.resource,
+      accepted: challenge.accepts[0],
+      payload: { signature: "0x01", authorization: {} },
+    });
+
+    const first = POST(jsonRequest(VALID_INPUT, signature));
+    const second = POST(jsonRequest(VALID_INPUT, signature));
+    const responses = await Promise.all([first, second]);
+
+    expect(responses.map((response) => response.status)).toEqual([200, 200]);
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(facilitatorCalls("/verify")).toBe(1);
+    expect(facilitatorCalls("/settle")).toBe(1);
+
+    const replay = await POST(jsonRequest(VALID_INPUT, signature));
+    expect(replay.status).toBe(409);
+    await expect(replay.json()).resolves.toEqual({
+      error: "PAYMENT_CREDENTIAL_REPLAYED",
+    });
+    expect(execute).toHaveBeenCalledTimes(1);
   });
 });

@@ -75,7 +75,6 @@ describe("connectMetaMask", () => {
       api: {
         supportedNetworks: {
           "0x14a34": "https://sepolia.base.org",
-          "0x2105": "https://mainnet.base.org",
         },
       },
       analytics: { enabled: false },
@@ -106,7 +105,7 @@ describe("connectMetaMask", () => {
       return {
         connect: vi.fn(async () => ({
           accounts: [CURRENT_ACCOUNT],
-          chainId: "0x2105" as const,
+          chainId: "0x14a34" as const,
         })),
         getProvider: () => provider,
         disconnect: vi.fn(async () => {}),
@@ -114,7 +113,7 @@ describe("connectMetaMask", () => {
     });
 
     const session = await connectMetaMask({
-      network: "eip155:8453",
+      network: "eip155:84532",
       onUri,
       timeoutMs: 100,
     });
@@ -128,7 +127,6 @@ describe("connectMetaMask", () => {
         api: {
           supportedNetworks: {
             "0x14a34": "https://sepolia.base.org",
-            "0x2105": "https://mainnet.base.org",
           },
         },
         analytics: { enabled: false },
@@ -149,7 +147,7 @@ describe("connectMetaMask", () => {
 
     await expect(
       connectMetaMask({
-        network: "eip155:8453",
+        network: "eip155:84532",
         onUri: vi.fn(),
         timeoutMs: 5,
         createClient,

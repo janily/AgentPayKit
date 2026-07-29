@@ -2,3 +2,5 @@ node_modules
 .next
 next-env.d.ts
 SKILL.md
+.env*
+!.env.example

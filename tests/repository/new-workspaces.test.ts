@@ -8,6 +8,6 @@ describe("developer-first MVP workspaces", () => {
   ])("declares %s with the expected name", async (path, name) => {
     const value = JSON.parse(await readFile(path, "utf8"));
     expect(value.name).toBe(name);
-    expect(value.engines).toBeUndefined();
+    expect(value.engines).toEqual({ node: ">=20.19.0" });
   });
 });

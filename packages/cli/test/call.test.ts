@@ -179,7 +179,7 @@ describe("callPaidSkill HTTP state table", () => {
         built.dependencies,
       ),
     ).rejects.toMatchObject({
-      code: "PRICE_EXCEEDS_MAXIMUM",
+      code: "PRICE_EXCEEDS_LIMIT",
       paymentState: "not-charged",
     });
     expect(built.dependencies.connectWallet).not.toHaveBeenCalled();
@@ -190,7 +190,7 @@ describe("callPaidSkill HTTP state table", () => {
       response(402, {}, { "PAYMENT-REQUIRED": challenge }),
     ]);
     built.dependencies.createSignature = vi.fn(async () => {
-      throw new Error("PAYMENT_REJECTED");
+      throw new Error("USER_REJECTED_PAYMENT");
     });
     await expect(
       callPaidSkill(
@@ -198,7 +198,7 @@ describe("callPaidSkill HTTP state table", () => {
         built.dependencies,
       ),
     ).rejects.toMatchObject({
-      code: "PAYMENT_REJECTED",
+      code: "USER_REJECTED_PAYMENT",
       paymentState: "not-charged",
     });
     expect(built.fetch).toHaveBeenCalledOnce();

@@ -3,6 +3,14 @@ import { z } from "zod";
 
 import { reviewRepository } from "./src/review-repository";
 
+const scaffoldPayee = "0x1111111111111111111111111111111111111111";
+const payTo = process.env.AGENTPAY_RECEIVER_ADDRESS;
+if (payTo === undefined || payTo === "" || payTo === scaffoldPayee) {
+  if (process.env.NODE_ENV !== "test") {
+    throw new Error("AGENTPAY_RECEIVER_ADDRESS_REQUIRED");
+  }
+}
+
 export default definePaidSkill({
   name: "__PROJECT_NAME__",
   description:
@@ -10,7 +18,7 @@ export default definePaidSkill({
   endpointPath: "/api/invoke",
   price: "0.05",
   network: "base-sepolia",
-  payTo: "0x1111111111111111111111111111111111111111",
+  payTo: (payTo ?? scaffoldPayee) as `0x${string}`,
   facilitatorUrl: "https://x402.org/facilitator",
   timeoutMs: 45_000,
   exampleInput: {

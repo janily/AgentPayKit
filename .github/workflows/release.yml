@@ -1,0 +1,54 @@
+name: Publish npm alpha
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Prerelease version without v prefix
+        required: true
+        type: string
+      ref:
+        description: Exact reviewed commit SHA
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - name: Verify exact release commit
+        shell: bash
+        env:
+          RELEASE_REF: ${{ inputs.ref }}
+        run: |
+          [[ "$RELEASE_REF" =~ ^[0-9a-fA-F]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "${RELEASE_REF,,}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.19.x
+          registry-url: https://registry.npmjs.org
+      - run: npm install --global npm@latest pnpm@latest
+      - run: pnpm install --frozen-lockfile
+      - name: Check package versions
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: pnpm version:check "$RELEASE_VERSION"
+      - run: pnpm verify
+      - run: pnpm package:smoke
+      - name: Publish Server
+        working-directory: packages/server
+        run: npm publish --access public --tag alpha --provenance
+      - name: Publish CLI
+        working-directory: packages/cli
+        run: npm publish --access public --tag alpha --provenance
+      - name: Publish scaffolder
+        working-directory: packages/create-agentpay-skill
+        run: npm publish --access public --tag alpha --provenance

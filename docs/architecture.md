@@ -34,6 +34,11 @@ to the configured public payee address.
    the selected account, network, amount, and a nonzero transaction hash before
    reporting success.
 
+Within one Server instance, requests carrying the same payment credential share
+one in-flight execution and cached response, preventing concurrent duplicate
+business execution. Cross-instance and durable duplicate settlement protection
+remains the responsibility of the x402 Facilitator and on-chain authorization.
+
 Wallet confirmation may wait up to five minutes and is separate from the
 post-signature response timeout of at most 60 seconds. Network ambiguity after a
 signed request becomes `PAYMENT_STATE_UNKNOWN`, never an automatic retry.
@@ -44,8 +49,8 @@ signed request becomes `PAYMENT_STATE_UNKNOWN`, never an automatic retry.
   Facilitator selection. Secrets for business APIs stay in Vercel environment
   variables.
 - The official x402 packages own challenge encoding, payment verification, and
-  settlement behavior. Base Sepolia and Base Mainnet official USDC are the only
-  supported assets.
+  settlement behavior. Official Base Sepolia USDC is the only supported asset
+  in this preview; Mainnet quotes are rejected before wallet access.
 - MetaMask owns wallet accounts and signatures. AgentPayKit stores neither a
   private key nor a seed phrase; a reusable connection session still requires a
   fresh confirmation for every payment.

@@ -50,7 +50,7 @@ describe("local paid Skill consumer flow", () => {
     const fixture = callFixture({ walletRejects: true });
 
     await expect(fixture.call()).rejects.toMatchObject({
-      code: "PAYMENT_REJECTED",
+      code: "USER_REJECTED_PAYMENT",
       paymentState: "not-charged",
     });
     expect(fixture.counters).toEqual({

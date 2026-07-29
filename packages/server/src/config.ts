@@ -9,7 +9,7 @@ const KEBAB_CASE_NAME = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 const EVM_ADDRESS = /^0x[0-9a-fA-F]{40}$/;
 const ZERO_ADDRESS = /^0x0{40}$/i;
 
-export type SupportedNetwork = "base-sepolia" | "base";
+export type SupportedNetwork = "base-sepolia";
 
 export interface Schema<T> {
   safeParse(
@@ -116,7 +116,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function isSupportedNetwork(value: unknown): value is SupportedNetwork {
-  return value === "base-sepolia" || value === "base";
+  return value === "base-sepolia";
 }
 
 function isNonZeroAddress(value: unknown): value is `0x${string}` {
@@ -144,13 +144,10 @@ function validateTimeout(value: unknown): void {
 }
 
 function validateFacilitator(
-  network: SupportedNetwork,
+  _network: SupportedNetwork,
   facilitatorUrl: unknown,
 ): void {
   if (facilitatorUrl === undefined) {
-    if (network === "base") {
-      throw new Error("INVALID_PAID_SKILL_CONFIG");
-    }
     return;
   }
 
@@ -165,11 +162,7 @@ function validateFacilitator(
     throw new Error("INVALID_PAID_SKILL_CONFIG");
   }
 
-  if (
-    url.protocol !== "https:" ||
-    (network === "base" &&
-      url.toString().replace(/\/$/, "") === TESTNET_FACILITATOR)
-  ) {
+  if (url.protocol !== "https:") {
     throw new Error("INVALID_PAID_SKILL_CONFIG");
   }
 }

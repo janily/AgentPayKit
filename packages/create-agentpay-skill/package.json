@@ -6,12 +6,15 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/agentpaykit/agentpaykit.git",
+    "url": "git+https://github.com/janily/AgentPayKit.git",
     "directory": "packages/create-agentpay-skill"
   },
-  "homepage": "https://github.com/agentpaykit/agentpaykit#readme",
+  "homepage": "https://github.com/janily/AgentPayKit#readme",
   "bugs": {
-    "url": "https://github.com/agentpaykit/agentpaykit/issues"
+    "url": "https://github.com/janily/AgentPayKit/issues"
+  },
+  "engines": {
+    "node": ">=20.19.0"
   },
   "keywords": [
     "agentpay",

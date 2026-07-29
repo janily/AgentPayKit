@@ -2,6 +2,9 @@
   "name": "paid-repo-review",
   "version": "0.1.0-alpha.1",
   "private": true,
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "type": "module",
   "scripts": {
     "clean": "node scripts/clean.mjs",

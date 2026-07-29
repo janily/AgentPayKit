@@ -5,6 +5,19 @@ import { walletCommand } from "./commands/wallet";
 import { CliError } from "./errors";
 import { errorOutput, humanError, humanSuccess, successOutput } from "./output";
 
+export const HELP_TEXT = `agentpay - call Base Sepolia x402 paid Skills
+
+Usage:
+  agentpay call <endpoint> (--input-json <json> | --input-file <path>) --max-price <usdc> [--timeout <seconds>] [--json]
+  agentpay doctor [--json]
+  agentpay wallet disconnect [--json]
+  agentpay --help
+
+Examples:
+  agentpay call https://skill.example/api/invoke --input-file ./input.json --max-price 0.05
+  agentpay doctor
+  agentpay wallet disconnect`;
+
 export interface CliDependencies {
   call: CallDependencies;
   doctor(): Promise<DoctorResult>;
@@ -20,6 +33,13 @@ export async function runCli(
   const command = argv[0];
   let json = argv.includes("--json");
   try {
+    if (
+      command === undefined ||
+      ((command === "--help" || command === "-h") && argv.length === 1)
+    ) {
+      dependencies.writeStdout(HELP_TEXT);
+      return 0;
+    }
     if (command !== "call" && command !== "doctor" && command !== "wallet") {
       throw new CliError("UNKNOWN_COMMAND", "not-charged");
     }

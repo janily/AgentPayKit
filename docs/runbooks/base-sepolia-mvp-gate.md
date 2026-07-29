@@ -38,7 +38,7 @@ MetaMask Mobile.
 
 1. Record the starting balance/transfer position and UTC time.
 2. Start a new call and reject its human confirmation in MetaMask Mobile.
-3. Record `PAYMENT_REJECTED` with `not-charged` and verify no signed business
+3. Record `USER_REJECTED_PAYMENT` with `not-charged` and verify no signed business
    request produced a USDC Transfer to the payee.
 
 ## Case 3 — business failure: zero transfer
@@ -90,4 +90,5 @@ payment payload or signature.
 
 If any case yields `PAYMENT_STATE_UNKNOWN`, stop. Do not retry. Investigate the
 wallet and chain independently and mark this gate failed or inconclusive. The
-Mainnet gate is blocked until all three cases have complete, reviewed evidence.
+The Developer Preview remains blocked until all three cases have complete,
+reviewed evidence. Base Mainnet remains out of scope.

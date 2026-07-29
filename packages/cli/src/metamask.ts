@@ -72,7 +72,6 @@ export function metaMaskClientOptions(
     api: {
       supportedNetworks: {
         "0x14a34": NETWORKS["eip155:84532"].rpcUrl,
-        "0x2105": NETWORKS["eip155:8453"].rpcUrl,
       },
     },
     analytics: { enabled: false },

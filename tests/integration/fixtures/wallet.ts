@@ -26,7 +26,7 @@ export function createFixtureWallet(
     },
     async createSignature({ requirement }) {
       counters.signatureRequests += 1;
-      if (rejects) throw new Error("PAYMENT_REJECTED");
+      if (rejects) throw new Error("USER_REJECTED_PAYMENT");
       const signature = encodeFixtureSignature(requirement);
       capture(
         signature,

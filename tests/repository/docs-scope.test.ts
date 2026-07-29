@@ -104,14 +104,14 @@ describe("developer-first MVP documentation", () => {
       expect(position, step).toBeGreaterThan(previous);
       previous = position;
     }
-    expect(ci).toMatch(/node-version:\s*latest/);
+    expect(ci).toContain("node: [20.19.x, 24.x]");
+    expect(ci).toContain("node-version: ${{ matrix.node }}");
     expect(ci).not.toMatch(/\bcorepack\b/i);
     expect(implementationPlan).not.toMatch(/\bcorepack\b/i);
     expect(implementationPlan).toContain("npm install --global pnpm@latest");
-    expect(ci).not.toMatch(/node-version:\s*["']?\d/);
     expect(ci).not.toMatch(/pnpm@[0-9]/);
     expect(rootPackage.packageManager).toBeUndefined();
-    expect(rootPackage.engines).toBeUndefined();
+    expect(rootPackage.engines).toEqual({ node: ">=20.19.0" });
     expect(ci).not.toMatch(
       /(?:private.key|seed phrase|mnemonic|wallet secret|PAYMENT-SIGNATURE)/i,
     );
@@ -163,10 +163,10 @@ describe("developer-first MVP documentation", () => {
     expect(dod).toMatch(/- \[x\] Final secret and scope scan/is);
     expect(dod).toMatch(/- \[ \] Final independent review/is);
     expect(dod).toMatch(/- \[ \] Manual Base Sepolia evidence/is);
-    expect(dod).toMatch(/- \[ \] After Sepolia passes.+Base Mainnet/is);
-    expect(dod).toMatch(/local\/reproducible.+are complete/is);
+    expect(dod).toMatch(/- \[x\] Base Mainnet is explicitly excluded/is);
+    expect(dod).toMatch(/local and\s+reproducible verification is complete/is);
     expect(dod).toMatch(
-      /Manual Base Sepolia evidence, Base Mainnet evidence, and final\s+independent review remain pending/is,
+      /Manual Base Sepolia evidence and final\s+independent review remain pending/is,
     );
   });
 

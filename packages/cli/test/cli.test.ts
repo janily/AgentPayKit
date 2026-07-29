@@ -1,6 +1,11 @@
+import { mkdtemp, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
 import { describe, expect, test, vi } from "vitest";
 
 import { runDoctorChecks } from "../src/commands/doctor";
+import { parseCallArguments } from "../src/commands/call";
 import {
   createDefaultDependencies,
   renderTerminalQr,
@@ -24,7 +29,7 @@ function fixture(overrides: Partial<CliDependencies> = {}) {
       node: "v24.0.0",
       pnpm: "11.0.0",
       metamask: "ok",
-      rpc: { "eip155:84532": "ok", "eip155:8453": "ok" },
+      rpc: { "eip155:84532": "ok" },
     })),
     disconnectWallet: vi.fn(async () => undefined),
     writeStdout: (line) => stdout.push(line),
@@ -35,6 +40,70 @@ function fixture(overrides: Partial<CliDependencies> = {}) {
 }
 
 describe("minimal agentpay CLI", () => {
+  test.each([[[]], [["--help"]], [["-h"]]])(
+    "prints root help for %j",
+    async (argv) => {
+      const built = fixture();
+      expect(await runCli(argv, built.dependencies)).toBe(0);
+      expect(built.stdout[0]).toContain("Usage:");
+      expect(built.stdout[0]).toContain("agentpay call");
+      expect(built.stdout[0]).toContain("--input-file");
+      expect(built.stderr).toEqual([]);
+    },
+  );
+
+  test("reads structured input from a JSON file", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "agentpay-input-"));
+    const inputFile = join(directory, "input.json");
+    await writeFile(
+      inputFile,
+      '{"repository":"https://github.com/openai/openai-node"}',
+    );
+
+    expect(
+      parseCallArguments([
+        "https://skill.example/api/invoke",
+        "--input-file",
+        inputFile,
+        "--max-price",
+        "0.05",
+      ]).input,
+    ).toEqual({ repository: "https://github.com/openai/openai-node" });
+  });
+
+  test("reports missing and malformed JSON files without side effects", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "agentpay-input-"));
+    const malformed = join(directory, "malformed.json");
+    await writeFile(malformed, "not json");
+    const base = ["https://skill.example/api/invoke", "--input-file"];
+
+    expect(() =>
+      parseCallArguments([
+        ...base,
+        join(directory, "missing.json"),
+        "--max-price",
+        "0.05",
+      ]),
+    ).toThrow("INPUT_FILE_NOT_FOUND");
+    expect(() =>
+      parseCallArguments([...base, malformed, "--max-price", "0.05"]),
+    ).toThrow("INVALID_INPUT_JSON");
+  });
+
+  test("requires exactly one input source", () => {
+    expect(() =>
+      parseCallArguments([
+        "https://skill.example/api/invoke",
+        "--input-json",
+        "{}",
+        "--input-file",
+        "input.json",
+        "--max-price",
+        "0.05",
+      ]),
+    ).toThrow("INVALID_ARGUMENTS");
+  });
+
   test("production wallet callback renders a QR without printing its raw URI", () => {
     const written: string[] = [];
     const renderer = vi.fn(() => "[scannable qr]");
@@ -77,7 +146,7 @@ describe("minimal agentpay CLI", () => {
     ).toBe(false);
   });
 
-  test("doctor accepts current versions and checks wallet initialization plus both Base RPCs", async () => {
+  test("doctor accepts current versions and checks the Base Sepolia RPC", async () => {
     const initializeMetaMask = vi.fn(async () => undefined);
     const checkRpc = vi.fn(async () => undefined);
     await expect(
@@ -90,7 +159,6 @@ describe("minimal agentpay CLI", () => {
     ).resolves.toMatchObject({ node: "v99.0.0", pnpm: "99.0.0" });
     expect(initializeMetaMask).toHaveBeenCalledOnce();
     expect(checkRpc).toHaveBeenCalledWith("eip155:84532");
-    expect(checkRpc).toHaveBeenCalledWith("eip155:8453");
   });
 
   test("supports call, doctor, and wallet disconnect on any Node platform", async () => {
@@ -105,7 +173,7 @@ describe("minimal agentpay CLI", () => {
         node: "v24.0.0",
         pnpm: "11.0.0",
         metamask: "ok",
-        rpc: { "eip155:84532": "ok", "eip155:8453": "ok" },
+        rpc: { "eip155:84532": "ok" },
       },
       payment: null,
     });

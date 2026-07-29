@@ -128,8 +128,7 @@ async function verifyDeployedQuote({
   }
 
   const requirement = challenge.accepts[0];
-  const expectedNetwork =
-    skill.network === "base-sepolia" ? "eip155:84532" : "eip155:8453";
+  const expectedNetwork = "eip155:84532";
   const expectedAmount = usdcToAtomic(skill.price).toString();
   const expectedAsset = getDefaultAsset(expectedNetwork).address.toLowerCase();
 

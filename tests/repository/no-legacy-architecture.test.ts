@@ -134,7 +134,7 @@ describe("legacy architecture removal", () => {
     const rootPackage = await readJson("package.json");
     const rootScripts = rootPackage.scripts as Record<string, string>;
 
-    expect(rootScripts.build).toBe("pnpm -r run build");
+    expect(rootScripts.build).toBe("node scripts/build-workspaces.mjs");
     expect(rootScripts.typecheck).toBe("pnpm -r run typecheck");
     expect(rootScripts.test).toBe(
       "pnpm -r run test && vitest run tests/integration tests/repository",

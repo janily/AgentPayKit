@@ -73,22 +73,16 @@ describe("published CLI package", () => {
     );
     const smoke = spawnSync(
       process.execPath,
-      [join(extractedPackage, "dist", "index.js"), "invoke", "--json"],
+      [join(extractedPackage, "dist", "index.js"), "--help"],
       {
         cwd: extractedPackage,
         env: environment,
         encoding: "utf8",
       },
     );
-    expect(smoke.status).toBe(2);
-    expect(smoke.stdout).toBe("");
-    expect(JSON.parse(smoke.stderr)).toEqual({
-      ok: false,
-      error: {
-        code: "UNKNOWN_COMMAND",
-        message: "UNKNOWN_COMMAND",
-        paymentState: "not-charged",
-      },
-    });
+    expect(smoke.status).toBe(0);
+    expect(smoke.stdout).toContain("Usage:");
+    expect(smoke.stdout).toContain("--input-file");
+    expect(smoke.stderr).toBe("");
   }, 60_000);
 });

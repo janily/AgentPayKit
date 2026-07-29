@@ -338,7 +338,7 @@ describe("selectPaymentRequirement", () => {
         header(
           paymentRequired({ accepts: [requirement({ amount: "50001" })] }),
         ),
-      "PRICE_EXCEEDS_MAXIMUM",
+      "PRICE_EXCEEDS_LIMIT",
     ],
     [
       "no acceptable candidate",

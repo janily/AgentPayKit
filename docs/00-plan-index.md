@@ -23,16 +23,17 @@
 
 ## Execution state
 
-| Gate                    | Tasks | State       | Outcome                                                                       |
-| ----------------------- | ----: | ----------- | ----------------------------------------------------------------------------- |
-| A — Publisher core      |   1–4 | Complete    | Single config, generated instructions, success-only official x402 handler     |
-| B — One-command publish |   5–7 | Complete    | Safe scaffold, one Vercel deployment, deterministic example                   |
-| C — Consumer core       |  8–10 | Complete    | Strict quote checks, MetaMask confirmation, two-request CLI                   |
-| D — Vertical slice      |    11 | Complete    | Success settles once; defined failures settle zero times                      |
-| E — Migration           |    12 | Complete    | Live tree reduced to the five synchronous workspaces                          |
-| F — Release             | 13–14 | In progress | Documentation/CI, reproducible build, manual Sepolia, then controlled Mainnet |
+| Gate                    | Tasks | State       | Outcome                                                                   |
+| ----------------------- | ----: | ----------- | ------------------------------------------------------------------------- |
+| A — Publisher core      |   1–4 | Complete    | Single config, generated instructions, success-only official x402 handler |
+| B — One-command publish |   5–7 | Complete    | Safe scaffold, one Vercel deployment, deterministic example               |
+| C — Consumer core       |  8–10 | Complete    | Strict quote checks, MetaMask confirmation, two-request CLI               |
+| D — Vertical slice      |    11 | Complete    | Success settles once; defined failures settle zero times                  |
+| E — Migration           |    12 | Complete    | Live tree reduced to the five synchronous workspaces                      |
+| F — Release             | 13–14 | In progress | Documentation/CI, reproducible build, and manual Base Sepolia evidence    |
 
 The earlier asynchronous implementation is migration history, preserved by Git
 history and the `legacy-async-mvp` tag. It is not a current implementation path.
-Task 14 performs final reproducibility checks. Base Sepolia and Mainnet release
-gates remain manual and pending until redacted evidence is actually collected.
+Task 14 performs final reproducibility checks. The Base Sepolia release gate
+remains manual and pending until redacted evidence is actually collected;
+Mainnet is deferred beyond this preview.

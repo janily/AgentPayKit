@@ -1,6 +1,10 @@
 # AgentPayKit MVP definition of done
 
-Status: **Developer Preview only**. Gates A–E have automated repository evidence. Gate F's local/reproducible clean verification and final scan are complete. Manual Base Sepolia evidence, Base Mainnet evidence, and final independent review remain pending. Automated green tests do not prove a live transfer.
+Status: **Developer Preview only**. This is a release candidate, not a completed
+release. Gates A–E have automated repository evidence. Gate F's local and
+reproducible verification is complete. Manual Base Sepolia evidence and final
+independent review remain pending. Automated green tests do not prove a live
+transfer.
 
 ## Gate A — publisher core (Tasks 1–4)
 
@@ -52,12 +56,11 @@ Status: **Developer Preview only**. Gates A–E have automated repository eviden
       tests, and build passes on the release candidate.
 - [ ] Manual Base Sepolia evidence records one successful transfer, one rejected
       payment with zero transfer, and one business failure with zero transfer.
-- [ ] After Sepolia passes, one manually confirmed Base Mainnet `0.01 USDC` call
-      records its receipt and exact payee delta.
+- [x] Base Mainnet is explicitly excluded from this Developer Preview and does
+      not block the Base Sepolia release.
 - [x] Final secret and scope scan has no blocking findings.
 - [ ] Final independent review has no blocking findings.
 
-Follow the [Sepolia runbook](../runbooks/base-sepolia-mvp-gate.md) and only then
-the [Mainnet runbook](../runbooks/base-mainnet-mvp-gate.md). Do not create live
-evidence from simulated tests, and never convert the wallet confirmation steps
+Follow the [Sepolia runbook](../runbooks/base-sepolia-mvp-gate.md). Do not create
+live evidence from simulated tests, and never convert wallet confirmation steps
 into automation. Any unchecked Gate F item blocks release.

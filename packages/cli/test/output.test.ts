@@ -11,12 +11,12 @@ describe("CLI output", () => {
       payment: null,
     });
     expect(
-      errorOutput(new CliError("PAYMENT_REJECTED", "not-charged")),
+      errorOutput(new CliError("USER_REJECTED_PAYMENT", "not-charged")),
     ).toEqual({
       ok: false,
       error: {
-        code: "PAYMENT_REJECTED",
-        message: "PAYMENT_REJECTED",
+        code: "USER_REJECTED_PAYMENT",
+        message: "USER_REJECTED_PAYMENT",
         paymentState: "not-charged",
       },
     });

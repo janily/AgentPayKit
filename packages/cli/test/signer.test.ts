@@ -253,7 +253,7 @@ describe("createPaymentSignature", () => {
       requirement: requirement(),
     });
 
-    await expect(promise).rejects.toThrow("PAYMENT_REJECTED");
+    await expect(promise).rejects.toThrow("USER_REJECTED_PAYMENT");
     await expect(promise).rejects.not.toThrow(SIGNATURE);
   });
 

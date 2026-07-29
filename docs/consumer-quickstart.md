@@ -9,7 +9,7 @@ MetaMask Mobile, and receive the result plus receipt.
 Install the CLI and the desired Skill using your Agent's normal Skill mechanism:
 
 ```bash
-npm install --global @agentpaykit/cli
+npm install --global @agentpaykit/cli@alpha
 agentpay doctor
 ```
 
@@ -25,7 +25,7 @@ direct invocation is:
 
 ```bash
 agentpay call https://skill.example/api/invoke \
-  --input-json '{"repository":"https://github.com/owner/repository"}' \
+  --input-file ./input.json \
   --max-price 0.05
 ```
 
@@ -48,9 +48,10 @@ agentpay wallet disconnect
 
 ## Failure and retry policy
 
-- A rejected wallet request produces `PAYMENT_REJECTED` and sends no paid
+- A rejected wallet request produces `USER_REJECTED_PAYMENT` and sends no paid
   request.
-- Invalid input, an invalid quote, or a price above `--max-price` is not charged.
+- Invalid input or an invalid quote is not charged. A price above `--max-price`
+  produces `PRICE_EXCEEDS_LIMIT` before wallet access.
 - A compatible server returns execution or settlement failures without a
   successful transfer.
 - `PAYMENT_STATE_UNKNOWN` means the signed request was sent but the CLI could

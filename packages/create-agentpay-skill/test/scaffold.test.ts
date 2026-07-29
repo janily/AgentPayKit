@@ -15,11 +15,14 @@ import { validateProjectName } from "../src/names.js";
 import { scaffold } from "../src/scaffold.js";
 
 const TEMPLATE_FILES = [
+  ".env.example",
   ".gitignore",
   "LICENSE",
   "README.md",
   "agentpay.skill.ts",
+  "app/api/health/route.ts",
   "app/api/invoke/route.ts",
+  "examples/input.json",
   "next.config.ts",
   "package.json",
   "scripts/clean.mjs",

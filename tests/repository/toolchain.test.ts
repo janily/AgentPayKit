@@ -19,6 +19,7 @@ const packageManifestPaths = [
 
 const executableConfigPaths = [
   ".github/workflows/ci.yml",
+  ".github/workflows/release.yml",
   "packages/cli/scripts/build.mjs",
 ];
 
@@ -34,7 +35,7 @@ test("uses the current Node and pnpm toolchain without Bun", async () => {
 
   expect(rootPackage.packageManager).toBeUndefined();
   expect(rootPackage.devEngines?.packageManager).toBeUndefined();
-  expect(rootPackage.engines).toBeUndefined();
+  expect(rootPackage.engines).toEqual({ node: ">=20.19.0" });
   expect(rootPackage.workspaces).toBeUndefined();
   await expect(
     access(resolve(repositoryRoot, ".nvmrc"), constants.F_OK),
@@ -95,4 +96,23 @@ test("uses the current Node and pnpm toolchain without Bun", async () => {
     expect(executableConfig).not.toMatch(/\b(?:bun|bunx)\b/i);
     expect(executableConfig).not.toMatch(/\bnode\d+\b/i);
   }
+});
+
+test("passes the requested prerelease version to the release check", async () => {
+  const releaseWorkflow = await readFile(
+    resolve(repositoryRoot, ".github/workflows/release.yml"),
+    "utf8",
+  );
+
+  expect(releaseWorkflow).toContain("RELEASE_VERSION: ${{ inputs.version }}");
+  expect(releaseWorkflow).toContain('pnpm version:check "$RELEASE_VERSION"');
+  expect(releaseWorkflow).not.toMatch(
+    /run: pnpm version:check[^\n]*\$\{\{ inputs\.version \}\}/,
+  );
+  expect(releaseWorkflow).toContain(
+    '[[ "$RELEASE_REF" =~ ^[0-9a-fA-F]{40}$ ]]',
+  );
+  expect(releaseWorkflow).toContain(
+    'test "$(git rev-parse HEAD)" = "${RELEASE_REF,,}"',
+  );
 });

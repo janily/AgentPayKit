@@ -136,7 +136,7 @@ export async function callPaidSkill(
     const safe = asCliError(error, "PAYMENT_STATE_UNKNOWN", "unknown");
     if (
       [
-        "PAYMENT_REJECTED",
+        "USER_REJECTED_PAYMENT",
         "WALLET_CONFIRMATION_TIMEOUT",
         "WALLET_CONNECTION_FAILED",
         "WALLET_STATE_CHANGED",

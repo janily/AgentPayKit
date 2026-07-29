@@ -4,14 +4,14 @@ export interface DoctorResult {
   node: string;
   pnpm: string;
   metamask: "ok";
-  rpc: Record<"eip155:84532" | "eip155:8453", "ok">;
+  rpc: Record<"eip155:84532", "ok">;
 }
 
 export interface DoctorChecks {
   nodeVersion: string;
   pnpmVersion(): Promise<string>;
   initializeMetaMask(): Promise<void>;
-  checkRpc(network: "eip155:84532" | "eip155:8453"): Promise<void>;
+  checkRpc(network: "eip155:84532"): Promise<void>;
 }
 
 export async function runDoctorChecks(
@@ -21,13 +21,12 @@ export async function runDoctorChecks(
     checks.pnpmVersion(),
     checks.initializeMetaMask(),
     checks.checkRpc("eip155:84532"),
-    checks.checkRpc("eip155:8453"),
   ]);
   return {
     node: checks.nodeVersion,
     pnpm,
     metamask: "ok",
-    rpc: { "eip155:84532": "ok", "eip155:8453": "ok" },
+    rpc: { "eip155:84532": "ok" },
   };
 }
 

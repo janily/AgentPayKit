@@ -62,11 +62,15 @@ const verificationSteps = [
 ];
 
 class CleanCommandError extends Error {
-  constructor(message, { exitCode, signal, timedOut = false } = {}) {
+  constructor(
+    message,
+    { exitCode, signal, timedOut = false, output = "" } = {},
+  ) {
     super(message);
     this.exitCode = exitCode;
     this.signal = signal;
     this.timedOut = timedOut;
+    this.output = output;
   }
 }
 
@@ -283,6 +287,7 @@ export async function runCleanBuildCommand(command) {
           new CleanCommandError("command timed out", {
             signal,
             timedOut: true,
+            output,
           }),
         );
       } else if (code === 0) {
@@ -293,7 +298,7 @@ export async function runCleanBuildCommand(command) {
           rejectPromise,
           new CleanCommandError(
             `command exited ${code ?? `after signal ${signal ?? "unknown"}`}`,
-            { exitCode: code, signal },
+            { exitCode: code, signal, output },
           ),
         );
       }
@@ -344,8 +349,12 @@ export async function assertCleanBuild({
             : error instanceof CleanCommandError && error.exitCode !== undefined
               ? ` (exit ${error.exitCode ?? `signal ${error.signal ?? "unknown"}`})`
               : " (could not start)";
+        const details =
+          error instanceof CleanCommandError && error.output !== ""
+            ? `\n${error.output}`
+            : "";
         throw new Error(
-          `clean verification command failed: ${basename(pnpm)} ${args.join(" ")}${outcome}`,
+          `clean verification command failed: ${basename(pnpm)} ${args.join(" ")}${outcome}${details}`,
         );
       }
     }

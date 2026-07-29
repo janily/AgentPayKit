@@ -39,8 +39,9 @@ examples/paid-repo-review       End-to-end example Skill
 
 ## Develop the repository
 
-Use the current stable Node.js and pnpm releases. The project does not pin an
-exact version of either tool.
+Use Node.js 20.19 or newer and the current stable pnpm release. Node 20.19 is the
+minimum compatibility target exercised by this preview; pnpm is intentionally
+not pinned to one exact version.
 
 ```bash
 npm install --global pnpm@latest
@@ -49,7 +50,7 @@ pnpm verify
 ```
 
 Automated tests never open a wallet or broadcast a transaction. Live Base
-Sepolia and Mainnet checks are separate, manual release gates.
+Sepolia checks are a separate manual release gate. Base Mainnet is out of scope.
 
 ## Product boundary
 

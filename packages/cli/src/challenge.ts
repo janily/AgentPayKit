@@ -124,7 +124,7 @@ export function selectPaymentRequirement({
   }
 
   if (candidate.amount > maxPrice) {
-    throw new Error("PRICE_EXCEEDS_MAXIMUM");
+    throw new Error("PRICE_EXCEEDS_LIMIT");
   }
 
   return {

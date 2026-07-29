@@ -1,0 +1,34 @@
+name: Payment issue
+description: Report a Base Sepolia quote, wallet, or settlement problem
+title: "[Payment]: "
+labels: [payment]
+body:
+  - type: markdown
+    attributes:
+      value: Never include a private key, seed phrase, wallet URI, payment signature, or full payment payload.
+  - type: input
+    id: version
+    attributes:
+      label: CLI and Server versions
+    validations:
+      required: true
+  - type: input
+    id: endpoint
+    attributes:
+      label: Public Endpoint
+    validations:
+      required: true
+  - type: dropdown
+    id: state
+    attributes:
+      label: Reported payment state
+      options: [not-charged, unknown, charged]
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitized evidence
+      description: Include the error code and public transaction hash only when one exists.
+    validations:
+      required: true

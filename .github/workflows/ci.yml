@@ -10,12 +10,29 @@ permissions:
 
 jobs:
   verify:
+    strategy:
+      matrix:
+        node: [20.19.x, 24.x]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: latest
+          node-version: ${{ matrix.node }}
+          registry-url: https://registry.npmjs.org
       - run: npm install --global pnpm@latest
       - run: pnpm install --frozen-lockfile
       - run: pnpm verify
+
+  package-smoke:
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.19.x
+          registry-url: https://registry.npmjs.org
+      - run: npm install --global pnpm@latest
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm package:smoke

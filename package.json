@@ -3,9 +3,12 @@
   "version": "0.1.0-alpha.1",
   "description": "Publish and call Base Sepolia synchronous x402 paid Skills",
   "private": true,
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "scripts": {
     "prebuild": "pnpm --filter @agentpaykit/server build",
-    "build": "pnpm -r run build",
+    "build": "node scripts/build-workspaces.mjs",
     "pretest": "pnpm --filter @agentpaykit/server build",
     "test": "pnpm -r run test && vitest run tests/integration tests/repository",
     "test:new-mvp": "vitest run tests/repository/new-workspaces.test.ts tests/integration",
@@ -15,6 +18,8 @@
     "lint": "pnpm -r run lint",
     "pretypecheck": "pnpm --filter @agentpaykit/server build",
     "typecheck": "pnpm -r run typecheck",
+    "package:smoke": "node scripts/package-smoke.mjs",
+    "version:check": "node scripts/check-version.mjs",
     "verify": "node scripts/assert-clean-build.mjs && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build"
   },
   "devDependencies": {

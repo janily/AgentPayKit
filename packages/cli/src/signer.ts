@@ -89,7 +89,7 @@ export async function createPaymentSignature({
     if (header === undefined) throw new Error("PAYMENT_SIGNATURE_FAILED");
     return header;
   } catch (error) {
-    if (isErrorCode(error, 4001)) throw new Error("PAYMENT_REJECTED");
+    if (isErrorCode(error, 4001)) throw new Error("USER_REJECTED_PAYMENT");
     if (isSafePaymentError(error)) throw error;
     throw new Error("PAYMENT_SIGNATURE_FAILED");
   }
@@ -190,7 +190,7 @@ function isSafePaymentError(error: unknown): error is Error {
     error instanceof Error &&
     [
       "INSUFFICIENT_USDC_BALANCE",
-      "PAYMENT_REJECTED",
+      "USER_REJECTED_PAYMENT",
       "PAYMENT_SIGNATURE_FAILED",
       "WALLET_STATE_CHANGED",
     ].includes(error.message)

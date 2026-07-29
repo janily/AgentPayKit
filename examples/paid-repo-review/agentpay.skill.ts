@@ -4,6 +4,18 @@ import { z } from "zod";
 import { isPublicGitHubRepository } from "./src/github";
 import { reviewRepository } from "./src/review-repository";
 
+const testPayee = "0x1111111111111111111111111111111111111111";
+const payTo = process.env.AGENTPAY_RECEIVER_ADDRESS;
+const allowsTestPayee =
+  process.env.NODE_ENV === "test" ||
+  process.env.AGENTPAY_ALLOW_TEST_RECEIVER === "1";
+if (
+  (payTo === undefined || payTo === "" || payTo === testPayee) &&
+  !allowsTestPayee
+) {
+  throw new Error("AGENTPAY_RECEIVER_ADDRESS_REQUIRED");
+}
+
 export default definePaidSkill({
   name: "paid-repo-review",
   description:
@@ -11,7 +23,7 @@ export default definePaidSkill({
   endpointPath: "/api/invoke",
   price: "0.01",
   network: "base-sepolia",
-  payTo: "0x000000000000000000000000000000000000dEaD",
+  payTo: (payTo ?? testPayee) as `0x${string}`,
   facilitatorUrl: "https://x402.org/facilitator",
   timeoutMs: 45_000,
   exampleInput: {

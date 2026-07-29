@@ -1,0 +1,24 @@
+name: Publisher feedback
+description: Report scaffolding, configuration, or deployment feedback
+title: "[Publisher]: "
+labels: [publisher]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: create-agentpay-skill version
+    validations:
+      required: true
+  - type: textarea
+    id: journey
+    attributes:
+      label: What did you try?
+      description: Include completion time, blocking step, and sanitized output.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected improvement
+    validations:
+      required: true

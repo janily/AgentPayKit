@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 import { parseMaxPrice } from "../amount";
 import { callPaidSkill, type CallDependencies } from "../call";
 import { CliError } from "../errors";
@@ -22,19 +24,40 @@ export function parseCallArguments(args: string[]): ParsedCall {
       json = true;
       continue;
     }
-    if (!["--input-json", "--max-price", "--timeout"].includes(flag)) usage();
+    if (
+      !["--input-json", "--input-file", "--max-price", "--timeout"].includes(
+        flag,
+      )
+    )
+      usage();
     if (values.has(flag)) usage();
     const value = args[++index];
     if (value === undefined || value.startsWith("--")) usage();
     values.set(flag, value);
   }
   const rawInput = values.get("--input-json");
+  const inputFile = values.get("--input-file");
   const rawMaximum = values.get("--max-price");
-  if (rawInput === undefined || rawMaximum === undefined) usage();
+  if (
+    (rawInput === undefined) === (inputFile === undefined) ||
+    rawMaximum === undefined
+  )
+    usage();
   let input: unknown;
   try {
-    input = JSON.parse(rawInput);
-  } catch {
+    const inputText =
+      rawInput ?? readFileSync(inputFile!, { encoding: "utf8", flag: "r" });
+    input = JSON.parse(inputText);
+  } catch (error) {
+    if (
+      inputFile !== undefined &&
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === "ENOENT"
+    ) {
+      throw new CliError("INPUT_FILE_NOT_FOUND", "not-charged");
+    }
     throw new CliError("INVALID_INPUT_JSON", "not-charged");
   }
   let maxPrice: bigint;

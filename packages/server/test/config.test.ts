@@ -157,30 +157,11 @@ describe("paid skill configuration", () => {
     expect(() => validatePaidSkillConfig(paidSkillConfig(overrides))).toThrow();
   });
 
-  it("requires an explicit facilitator URL on Base Mainnet", () => {
+  it("rejects Base Mainnet for the community preview", () => {
     expect(() =>
-      validatePaidSkillConfig(paidSkillConfig({ network: "base" })),
+      validatePaidSkillConfig({ ...paidSkillConfig(), network: "base" }),
     ).toThrow("INVALID_PAID_SKILL_CONFIG");
-    expect(() => definePaidSkill(paidSkillConfig({ network: "base" }))).toThrow(
-      "INVALID_PAID_SKILL_CONFIG",
-    );
   });
-
-  it.each([
-    "https://x402.org/facilitator",
-    "https://x402.org:443/facilitator",
-    "HTTPS://X402.ORG/facilitator",
-    "https://x402.org/facilitator/",
-  ])(
-    "rejects the testnet facilitator alias %s on Base Mainnet",
-    (facilitatorUrl) => {
-      expect(() =>
-        validatePaidSkillConfig(
-          paidSkillConfig({ network: "base", facilitatorUrl }),
-        ),
-      ).toThrow();
-    },
-  );
 
   it("normalizes defaults and freezes the defined skill", () => {
     const skill = definePaidSkill(paidSkillConfig());

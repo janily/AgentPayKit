@@ -6,7 +6,7 @@ live in any modules imported by that file.
 
 ## Prerequisites
 
-- current stable Node.js and pnpm releases;
+- Node.js 20.19 or newer and the current stable pnpm release;
 - a Vercel account and authenticated Vercel CLI session;
 - a public EVM address that receives USDC;
 - any secrets required by your own business code, configured in Vercel rather
@@ -23,6 +23,7 @@ pnpm create agentpay-skill@alpha my-paid-skill
 
 # 2. Set the payment terms, schemas and execute function
 cd my-paid-skill
+$EDITOR .env.local
 $EDITOR agentpay.skill.ts
 
 # 3. Verify and create one Vercel production deployment
@@ -41,8 +42,9 @@ parts by hand.
 - `name` and `description`;
 - one fixed decimal-string `price` in USDC;
 - `network`: `base-sepolia` for this preview; Base Mainnet is out of scope;
-- the public `payTo` address;
-- `facilitatorUrl` (a production facilitator is required for Mainnet);
+- the public receiver through `AGENTPAY_RECEIVER_ADDRESS` in `.env.local` and
+  the Vercel environment;
+- the Base Sepolia `facilitatorUrl`;
 - `exampleInput`, input and output schemas, `execute`, and `success`.
 
 The price must be greater than zero and have at most six decimal places. Input
