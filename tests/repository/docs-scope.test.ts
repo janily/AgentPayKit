@@ -26,7 +26,7 @@ describe("developer-first MVP documentation", () => {
 
     expect(guide).toContain("pnpm create agentpay-skill");
     expect(guide).toContain("agentpay.skill.ts");
-    expect(guide).toContain("pnpm deploy");
+    expect(guide).toContain("pnpm run deploy");
     expect(guide).toMatch(/Next\.js App Router/i);
     expect(guide).toMatch(/Vercel/i);
     expect(guide).not.toMatch(
@@ -50,7 +50,7 @@ describe("developer-first MVP documentation", () => {
   it("opens with both journeys and an explicit developer-only scope", async () => {
     const readme = await read("README.md");
 
-    expect(readme).toMatch(/Publish:.+agentpay\.skill\.ts.+pnpm deploy/is);
+    expect(readme).toMatch(/Publish:.+agentpay\.skill\.ts.+pnpm run deploy/is);
     expect(readme).toMatch(/Use:.+quoted price.+MetaMask.+result/is);
     expect(readme).toMatch(/Developer Preview/i);
     expect(readme).toMatch(

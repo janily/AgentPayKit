@@ -2,7 +2,7 @@
 
 ## Current baseline
 
-- Publisher: scaffold → edit `agentpay.skill.ts` → run one `pnpm deploy`.
+- Publisher: scaffold → edit `agentpay.skill.ts` → run one `pnpm run deploy`.
 - Consumer: ask the Agent → inspect quote → confirm each call in MetaMask →
   receive result and receipt.
 - Payment: one fixed USDC price per Endpoint through official x402 v2.

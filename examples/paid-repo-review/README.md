@@ -26,7 +26,7 @@ pnpm dev
 pnpm verify
 ```
 
-Deploy with `pnpm deploy` only after verification. Record the deployed Endpoint,
+Deploy with `pnpm run deploy` only after verification. Record the deployed Endpoint,
 commit SHA, receiver, fixed `0.01 USDC` price, and Base Sepolia acceptance
 evidence before publishing the generated Skill instructions.
 

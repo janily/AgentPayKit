@@ -27,7 +27,7 @@ $EDITOR .env.local
 $EDITOR agentpay.skill.ts
 
 # 3. Verify and create one Vercel production deployment
-pnpm deploy
+pnpm run deploy
 ```
 
 The scaffold owns the standard API route, official x402 integration, validation,
@@ -58,7 +58,7 @@ Start locally when developing:
 pnpm dev
 ```
 
-## What `pnpm deploy` does
+## What `pnpm run deploy` does
 
 The command validates the configuration, runs the project checks, invokes one
 Vercel production deployment, captures its HTTPS origin, requests the deployed

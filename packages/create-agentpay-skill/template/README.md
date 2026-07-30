@@ -34,7 +34,7 @@ opening a wallet.
 Install the Vercel CLI credentials for your account, then run:
 
 ```bash
-pnpm deploy
+pnpm run deploy
 ```
 
 Deployment runs tests, type checking, a production build, one Vercel production

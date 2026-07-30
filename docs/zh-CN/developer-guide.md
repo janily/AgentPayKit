@@ -5,7 +5,7 @@ AgentPayKit `v0.1.0-alpha.2` 是未经审计的 Base Sepolia Developer Preview�
 
 发布者从 `pnpm create agentpay-skill@alpha my-paid-skill` 开始，在 `.env.local`
 设置 `AGENTPAY_RECEIVER_ADDRESS`，完成 `agentpay.skill.ts` 和业务逻辑后运行
-`pnpm verify` 与 `pnpm deploy`。部署脚本会检查线上 402 报价是否与本地配置一致。
+`pnpm verify` 与 `pnpm run deploy`。部署脚本会检查线上 402 报价是否与本地配置一致。
 
 消费者安装 `@agentpaykit/cli@alpha`，调用时必须设置 `--max-price`，推荐使用
 `--input-file` 和 `--json`。CLI 会在连接钱包前校验 Endpoint、network、asset、amount

@@ -18,7 +18,7 @@ transfer.
 
 - [x] The scaffolder creates a complete, publish-safe Next.js App Router
       project without overwriting existing paths.
-- [x] `pnpm deploy` performs preflight, exactly one Vercel production deployment,
+- [x] `pnpm run deploy` performs preflight, exactly one Vercel production deployment,
       online quote verification, and final Skill instruction generation.
 - [x] `examples/paid-repo-review` supplies a deterministic model-free vertical
       example with one fixed Base Sepolia price.

@@ -6,7 +6,7 @@ wallets.
 AgentPayKit is a Developer Preview for publishing and calling synchronous,
 x402-paid Skills on Base Sepolia.
 
-> **Publish:** scaffold → edit `agentpay.skill.ts` → `pnpm deploy`
+> **Publish:** scaffold → edit `agentpay.skill.ts` → `pnpm run deploy`
 >
 > **Use:** ask your Agent → review the quoted price → confirm in MetaMask →
 > receive the result and receipt

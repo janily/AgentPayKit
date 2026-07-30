@@ -122,7 +122,7 @@ pnpm verify
 
    ```bash
    cd examples/paid-repo-review
-   pnpm deploy
+   pnpm run deploy
    ```
 
 4. 记录部署后的 Endpoint、commit SHA、network、price、receiver、Vercel deployment URL 和部署时间。
