@@ -29,3 +29,6 @@ pnpm verify
 Deploy with `pnpm deploy` only after verification. Record the deployed Endpoint,
 commit SHA, receiver, fixed `0.01 USDC` price, and Base Sepolia acceptance
 evidence before publishing the generated Skill instructions.
+
+The deploy command reads `.env.local` and passes the public receiver address to
+the Vercel build and runtime environments for that deployment.

@@ -79,7 +79,7 @@ describe("package contents", () => {
     ) as { name: string; dependencies?: Record<string, string> };
     expect(createdPackage.name).toBe("demo-skill");
     expect(createdPackage.dependencies?.["@agentpaykit/server"]).toBe(
-      "0.1.0-alpha.1",
+      "0.1.0-alpha.2",
     );
   });
 });

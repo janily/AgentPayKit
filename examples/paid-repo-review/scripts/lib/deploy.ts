@@ -35,7 +35,16 @@ export async function deploySkill({
   await run(["pnpm", "typecheck"], cwd);
   await run(["pnpm", "build"], cwd);
   const deploymentOutput = await run(
-    ["vercel", "deploy", "--prod", "--yes"],
+    [
+      "vercel",
+      "deploy",
+      "--prod",
+      "--yes",
+      "--build-env",
+      `AGENTPAY_RECEIVER_ADDRESS=${skill.payTo}`,
+      "--env",
+      `AGENTPAY_RECEIVER_ADDRESS=${skill.payTo}`,
+    ],
     cwd,
   );
 

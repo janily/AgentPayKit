@@ -1,4 +1,4 @@
-# AgentPayKit v0.1.0-alpha.1 外部发布指引
+# AgentPayKit v0.1.0-alpha.2 外部发布指引
 
 这份指引覆盖需要你自己的账号、钱包、npm 发布权限、Vercel 项目、
 GitHub 权限或真实 Agent 环境才能完成的任务。请在准备发布的确切
@@ -42,7 +42,7 @@ commit 上完成 `pnpm verify` 后，再执行下面步骤。
    npm view create-agentpay-skill versions --json
    ```
 
-3. 如果任意包已经包含 `0.1.0-alpha.1`，立即停止。不要覆盖旧版本，改为递增到下一个 alpha 版本；npm 版本发布后不可变。
+3. 如果任意包已经包含 `0.1.0-alpha.2`，立即停止。不要覆盖旧版本，改为递增到下一个 alpha 版本；npm 版本发布后不可变。
 
 4. 确认该 npm 账号已经启用 2FA，或准备好符合 npm 当前 2FA/trusted publishing 要求的发布方式。
 
@@ -80,7 +80,7 @@ commit 上完成 `pnpm verify` 后，再执行下面步骤。
    npm dist-tag ls create-agentpay-skill
    ```
 
-5. 确认 `alpha` 指向 `0.1.0-alpha.1`。确认 `latest` 没有被移动到这个预发布版本。
+5. 确认 `alpha` 指向 `0.1.0-alpha.2`。已有稳定版时，确认 `latest` 没有被移动到这个预发布版本。首次发布且不存在稳定版时，npm 可能自动创建 `latest`；公开命令仍必须显式使用 `@alpha`。
 
 ## 4. Registry smoke test
 
@@ -141,7 +141,7 @@ pnpm verify
 - 业务失败返回结构化失败，链上零转账；
 - 任何 `PAYMENT_STATE_UNKNOWN` 都必须停止执行，不得重试。
 
-创建 `docs/acceptance/v0.1.0-alpha.1-base-sepolia.md`，记录：
+创建 `docs/acceptance/v0.1.0-alpha.2-base-sepolia.md`，记录：
 
 - 日期和 UTC 时间；
 - commit SHA；
@@ -194,8 +194,8 @@ pnpm verify
 2. 从确切完成验证的 commit 创建 annotated tag：
 
    ```bash
-   git tag -a v0.1.0-alpha.1 -m "v0.1.0-alpha.1 Developer Preview"
-   git push origin v0.1.0-alpha.1
+   git tag -a v0.1.0-alpha.2 -m "v0.1.0-alpha.2 Developer Preview"
+   git push origin v0.1.0-alpha.2
    ```
 
 3. 创建 GitHub Pre-release，不要标记为最新稳定版。

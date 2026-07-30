@@ -1,6 +1,6 @@
 # Security policy
 
-AgentPayKit `v0.1.0-alpha.1` is an unaudited Developer Preview for Base Sepolia
+AgentPayKit `v0.1.0-alpha.2` is an unaudited Developer Preview for Base Sepolia
 only. Do not use it with Base Mainnet, high-value wallets, production funds, or
 wallets that hold unrelated assets.
 

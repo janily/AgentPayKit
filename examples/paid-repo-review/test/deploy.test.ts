@@ -107,7 +107,19 @@ describe("deploySkill", () => {
       [["pnpm", "test"], cwd],
       [["pnpm", "typecheck"], cwd],
       [["pnpm", "build"], cwd],
-      [["vercel", "deploy", "--prod", "--yes"], cwd],
+      [
+        [
+          "vercel",
+          "deploy",
+          "--prod",
+          "--yes",
+          "--build-env",
+          `AGENTPAY_RECEIVER_ADDRESS=${PAYEE}`,
+          "--env",
+          `AGENTPAY_RECEIVER_ADDRESS=${PAYEE}`,
+        ],
+        cwd,
+      ],
     ]);
     expect(
       run.mock.calls.filter(([argv]) => argv[0] === "vercel"),

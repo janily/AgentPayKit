@@ -41,3 +41,5 @@ Deployment runs tests, type checking, a production build, one Vercel production
 deployment, and an online quote check. It writes the verified Agent instructions
 to `skill/SKILL.md`. The preview supports Base Sepolia, fixed USDC pricing,
 synchronous JSON, and a fresh human MetaMask confirmation for every payment.
+The deploy command reads `.env.local` and passes the public receiver address to
+the Vercel build and runtime environments for that deployment.

@@ -30,7 +30,7 @@ importers:
   examples/paid-repo-review:
     dependencies:
       '@agentpaykit/server':
-        specifier: 0.1.0-alpha.1
+        specifier: 0.1.0-alpha.2
         version: link:../../packages/server
       '@x402/core':
         specifier: 2.19.0
@@ -113,7 +113,7 @@ importers:
   packages/create-agentpay-skill:
     devDependencies:
       '@agentpaykit/server':
-        specifier: 0.1.0-alpha.1
+        specifier: 0.1.0-alpha.2
         version: link:../server
       '@types/node':
         specifier: 24.13.3

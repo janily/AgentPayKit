@@ -1,6 +1,6 @@
 {
   "name": "create-agentpay-skill",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "description": "Create a Base Sepolia AgentPayKit paid Skill project",
   "license": "MIT",
   "type": "module",
@@ -42,7 +42,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
-    "@agentpaykit/server": "0.1.0-alpha.1",
+    "@agentpaykit/server": "0.1.0-alpha.2",
     "@types/node": "24.13.3",
     "@x402/core": "2.19.0",
     "@x402/evm": "2.19.0",

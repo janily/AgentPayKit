@@ -1,6 +1,6 @@
 {
   "name": "__PROJECT_NAME__",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "private": true,
   "engines": {
     "node": ">=20.19.0"
@@ -8,8 +8,8 @@
   "type": "module",
   "scripts": {
     "clean": "node scripts/clean.mjs",
-    "dev": "tsx scripts/generate-skill.ts --origin http://localhost:3000 && next dev",
-    "deploy": "tsx scripts/deploy.ts",
+    "dev": "tsx --env-file=.env.local scripts/generate-skill.ts --origin http://localhost:3000 && next dev",
+    "deploy": "tsx --env-file=.env.local scripts/deploy.ts",
     "test": "vitest run",
     "prelint": "node scripts/clean.mjs",
     "lint": "tsc --noEmit",
@@ -20,7 +20,7 @@
     "verify": "pnpm test && pnpm typecheck && pnpm build"
   },
   "dependencies": {
-    "@agentpaykit/server": "0.1.0-alpha.1",
+    "@agentpaykit/server": "0.1.0-alpha.2",
     "@x402/core": "2.19.0",
     "@x402/evm": "2.19.0",
     "next": "16.2.10",

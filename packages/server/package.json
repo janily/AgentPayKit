@@ -1,6 +1,6 @@
 {
   "name": "@agentpaykit/server",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "description": "Thin Next.js server adapter for Base Sepolia synchronous x402 paid Skills",
   "license": "MIT",
   "type": "module",

@@ -7,7 +7,7 @@ sequence is in [the external preview guide](external-preview-release-guide.md).
 ## Required checks
 
 1. Use a clean, reviewed commit on `main` and confirm all three package versions
-   match the intended release version, for example `0.1.0-alpha.1`.
+   match the intended release version, for example `0.1.0-alpha.2`.
 2. Run `pnpm install --frozen-lockfile`, `pnpm verify`, and
    `pnpm package:smoke` on Node.js 20.19 or newer.
 3. Confirm npm ownership, 2FA or Trusted Publishing, and that the version does

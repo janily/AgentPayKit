@@ -1,6 +1,6 @@
 {
   "name": "@agentpaykit/cli",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "description": "Safely call Base Sepolia synchronous x402 paid Skills from developer agents",
   "license": "MIT",
   "type": "module",

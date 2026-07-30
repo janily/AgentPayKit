@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.1.0-alpha.2
+
+### Fixed
+
+- Load `.env.local` in generated development and deployment commands.
+- Pass the public Base Sepolia receiver to Vercel build and runtime environments
+  so first-time deployments do not fail with `AGENTPAY_RECEIVER_ADDRESS_REQUIRED`.
+
+### Security
+
+- Only the public receiver address is forwarded to Vercel; wallet private keys
+  and seed phrases remain unsupported and must never enter project settings.
+
+### Known limitations
+
+- Base Mainnet remains out of scope for this preview.
+- Real wallet and chain acceptance still requires manual execution.
+
 ## 0.1.0-alpha.1
 
 ### Added
